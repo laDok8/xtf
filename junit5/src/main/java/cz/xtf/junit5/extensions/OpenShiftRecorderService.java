@@ -133,7 +133,6 @@ public class OpenShiftRecorderService {
      * @param context The test execution context
      */
     public void updateFilters(ExtensionContext context) {
-        ExtensionContext.Store classStore = getClassStore(context);
         OpenShift master = OpenShifts.master();
         OpenShift bm = BuildManagers.get().openShift();
         if (!isFilterInitializationComplete(context)) {
@@ -256,6 +255,10 @@ public class OpenShiftRecorderService {
     }
 
     private ExtensionContext.Store getClassStore(ExtensionContext extensionContext) {
+        if (extensionContext.getTestMethod().isPresent()) {
+            return extensionContext.getParent().get()
+                    .getStore(ExtensionContext.Namespace.create(extensionContext.getRequiredTestClass()));
+        }
         return extensionContext.getStore(ExtensionContext.Namespace.create(extensionContext.getRequiredTestClass()));
     }
 
