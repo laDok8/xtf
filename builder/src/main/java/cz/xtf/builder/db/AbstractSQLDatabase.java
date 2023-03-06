@@ -1,133 +1,203 @@
 package cz.xtf.builder.db;
 
+import cz.xtf.builder.builders.pod.ContainerBuilder;
+import cz.xtf.builder.builders.pod.PersistentVolumeClaim;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.function.Consumer;
-
 import org.apache.commons.io.IOUtils;
-
-import cz.xtf.builder.builders.pod.ContainerBuilder;
-import cz.xtf.builder.builders.pod.PersistentVolumeClaim;
 
 public abstract class AbstractSQLDatabase extends AbstractDatabase implements SQLExecutor {
 
-    public AbstractSQLDatabase(String symbolicName, String dataDir, boolean withLivenessProbe, boolean withReadinessProbe) {
-        super(symbolicName, dataDir, withLivenessProbe, withReadinessProbe);
-    }
+  public AbstractSQLDatabase(
+      String symbolicName, String dataDir, boolean withLivenessProbe, boolean withReadinessProbe) {
+    super(symbolicName, dataDir, withLivenessProbe, withReadinessProbe);
+  }
 
-    public AbstractSQLDatabase(String symbolicName, String dataDir, boolean withLivenessProbe, boolean withReadinessProbe,
-            boolean configureEnvironment) {
-        super(symbolicName, dataDir, withLivenessProbe, withReadinessProbe, configureEnvironment);
-    }
+  public AbstractSQLDatabase(
+      String symbolicName,
+      String dataDir,
+      boolean withLivenessProbe,
+      boolean withReadinessProbe,
+      boolean configureEnvironment) {
+    super(symbolicName, dataDir, withLivenessProbe, withReadinessProbe, configureEnvironment);
+  }
 
-    public AbstractSQLDatabase(String symbolicName, String dataDir, boolean withLivenessProbe, boolean withReadinessProbe,
-            boolean withStartupProbe,
-            boolean configureEnvironment) {
-        super(symbolicName, dataDir, withLivenessProbe, withReadinessProbe, withStartupProbe, configureEnvironment);
-    }
+  public AbstractSQLDatabase(
+      String symbolicName,
+      String dataDir,
+      boolean withLivenessProbe,
+      boolean withReadinessProbe,
+      boolean withStartupProbe,
+      boolean configureEnvironment) {
+    super(
+        symbolicName,
+        dataDir,
+        withLivenessProbe,
+        withReadinessProbe,
+        withStartupProbe,
+        configureEnvironment);
+  }
 
-    public AbstractSQLDatabase(String username, String password, String dbName, String symbolicName, String dataDir,
-            boolean withLivenessProbe, boolean withReadinessProbe) {
-        super(username, password, dbName, symbolicName, dataDir, withLivenessProbe, withReadinessProbe);
-    }
+  public AbstractSQLDatabase(
+      String username,
+      String password,
+      String dbName,
+      String symbolicName,
+      String dataDir,
+      boolean withLivenessProbe,
+      boolean withReadinessProbe) {
+    super(username, password, dbName, symbolicName, dataDir, withLivenessProbe, withReadinessProbe);
+  }
 
-    public AbstractSQLDatabase(String username, String password, String dbName, String symbolicName, String dataDir,
-            boolean withLivenessProbe, boolean withReadinessProbe, boolean configureEnvironment) {
-        super(username, password, dbName, symbolicName, dataDir, withLivenessProbe, withReadinessProbe, configureEnvironment);
-    }
+  public AbstractSQLDatabase(
+      String username,
+      String password,
+      String dbName,
+      String symbolicName,
+      String dataDir,
+      boolean withLivenessProbe,
+      boolean withReadinessProbe,
+      boolean configureEnvironment) {
+    super(
+        username,
+        password,
+        dbName,
+        symbolicName,
+        dataDir,
+        withLivenessProbe,
+        withReadinessProbe,
+        configureEnvironment);
+  }
 
-    public AbstractSQLDatabase(String username, String password, String dbName, String symbolicName, String dataDir,
-            boolean withLivenessProbe, boolean withReadinessProbe, boolean withStartupProbe, boolean configureEnvironment) {
-        super(username, password, dbName, symbolicName, dataDir, withLivenessProbe, withReadinessProbe, withStartupProbe,
-                configureEnvironment);
-    }
+  public AbstractSQLDatabase(
+      String username,
+      String password,
+      String dbName,
+      String symbolicName,
+      String dataDir,
+      boolean withLivenessProbe,
+      boolean withReadinessProbe,
+      boolean withStartupProbe,
+      boolean configureEnvironment) {
+    super(
+        username,
+        password,
+        dbName,
+        symbolicName,
+        dataDir,
+        withLivenessProbe,
+        withReadinessProbe,
+        withStartupProbe,
+        configureEnvironment);
+  }
 
-    public AbstractSQLDatabase(String symbolicName, String dataDir, PersistentVolumeClaim pvc, boolean withLivenessProbe,
-            boolean withReadinessProbe) {
-        super(symbolicName, dataDir, pvc, withLivenessProbe, withReadinessProbe);
-    }
+  public AbstractSQLDatabase(
+      String symbolicName,
+      String dataDir,
+      PersistentVolumeClaim pvc,
+      boolean withLivenessProbe,
+      boolean withReadinessProbe) {
+    super(symbolicName, dataDir, pvc, withLivenessProbe, withReadinessProbe);
+  }
 
-    public AbstractSQLDatabase(String symbolicName, String dataDir, PersistentVolumeClaim pvc, boolean withLivenessProbe,
-            boolean withReadinessProbe, boolean withStartupProbe) {
-        super(symbolicName, dataDir, pvc, withLivenessProbe, withReadinessProbe, withStartupProbe);
-    }
+  public AbstractSQLDatabase(
+      String symbolicName,
+      String dataDir,
+      PersistentVolumeClaim pvc,
+      boolean withLivenessProbe,
+      boolean withReadinessProbe,
+      boolean withStartupProbe) {
+    super(symbolicName, dataDir, pvc, withLivenessProbe, withReadinessProbe, withStartupProbe);
+  }
 
-    public AbstractSQLDatabase(String symbolicName, String dataDir, PersistentVolumeClaim pvc) {
-        super(symbolicName, dataDir, pvc);
-    }
+  public AbstractSQLDatabase(String symbolicName, String dataDir, PersistentVolumeClaim pvc) {
+    super(symbolicName, dataDir, pvc);
+  }
 
-    public AbstractSQLDatabase(String username, String password, String dbName, String symbolicName, String dataDir,
-            PersistentVolumeClaim pvc) {
-        super(username, password, dbName, symbolicName, dataDir, pvc);
-    }
+  public AbstractSQLDatabase(
+      String username,
+      String password,
+      String dbName,
+      String symbolicName,
+      String dataDir,
+      PersistentVolumeClaim pvc) {
+    super(username, password, dbName, symbolicName, dataDir, pvc);
+  }
 
-    public AbstractSQLDatabase(String username, String password, String dbName, String symbolicName, String dataDir) {
-        super(username, password, dbName, symbolicName, dataDir);
-    }
+  public AbstractSQLDatabase(
+      String username, String password, String dbName, String symbolicName, String dataDir) {
+    super(username, password, dbName, symbolicName, dataDir);
+  }
 
-    public AbstractSQLDatabase(String symbolicName, String dataDir) {
-        super(symbolicName, dataDir);
-    }
+  public AbstractSQLDatabase(String symbolicName, String dataDir) {
+    super(symbolicName, dataDir);
+  }
 
-    public void executeSQL(Consumer<Connection> execute) {
-        getSQLExecutor("127.0.0.1", getPort()).executeSQL(execute);
-    }
+  public void executeSQL(Consumer<Connection> execute) {
+    getSQLExecutor("127.0.0.1", getPort()).executeSQL(execute);
+  }
 
-    public void executeSQLFile(String resourceName) {
-        executeSQL(db -> {
-            try {
-                IOUtils.readLines(AbstractSQLDatabase.class.getResourceAsStream(resourceName)).forEach(x -> {
-                    try {
+  public void executeSQLFile(String resourceName) {
+    executeSQL(
+        db -> {
+          try {
+            IOUtils.readLines(AbstractSQLDatabase.class.getResourceAsStream(resourceName))
+                .forEach(
+                    x -> {
+                      try {
                         db.createStatement().execute(x);
-                    } catch (SQLException e) {
+                      } catch (SQLException e) {
                         throw new IllegalArgumentException(e);
-                    }
-                });
-            } catch (final IOException e) {
-                throw new IllegalStateException(e);
-            }
+                      }
+                    });
+          } catch (final IOException e) {
+            throw new IllegalStateException(e);
+          }
         });
+  }
+
+  public SQLExecutor getSQLExecutor(String hostname, int port) {
+    return new SQLExecutorImpl(
+        String.format(getJDBCConnectionStringPattern(), hostname, port, getDbName()),
+        getUsername(),
+        getPassword());
+  }
+
+  @Override
+  protected void configureContainer(ContainerBuilder containerBuilder) {
+    ProbeSettings settings = getProbeSettings();
+    configureContainer(containerBuilder, settings);
+  }
+
+  private void configureContainer(ContainerBuilder containerBuilder, ProbeSettings settings) {
+    if (withLivenessProbe) {
+      containerBuilder
+          .addLivenessProbe()
+          .setInitialDelay(settings.getLivenessInitialDelaySeconds())
+          .createTcpProbe(settings.getLivenessTcpProbe());
     }
-
-    public SQLExecutor getSQLExecutor(String hostname, int port) {
-        return new SQLExecutorImpl(String.format(getJDBCConnectionStringPattern(), hostname, port, getDbName()), getUsername(),
-                getPassword());
+    if (withReadinessProbe) {
+      containerBuilder
+          .addReadinessProbe()
+          .setInitialDelaySeconds(settings.getReadinessInitialDelaySeconds())
+          .createExecProbe("/bin/sh", "-i", "-c", settings.getReadinessProbeCommand());
     }
-
-    @Override
-    protected void configureContainer(ContainerBuilder containerBuilder) {
-        ProbeSettings settings = getProbeSettings();
-        configureContainer(containerBuilder, settings);
+    if (withStartupProbe) {
+      containerBuilder
+          .addStartupProbe()
+          .setFailureThreshold(settings.getStartupFailureThreshold())
+          .setPeriodSeconds(settings.getStartupPeriodSeconds())
+          .createExecProbe("/bin/sh", "-i", "-c", settings.getStartupProbeCommand());
     }
+  }
 
-    private void configureContainer(ContainerBuilder containerBuilder, ProbeSettings settings) {
-        if (withLivenessProbe) {
-            containerBuilder.addLivenessProbe()
-                    .setInitialDelay(settings.getLivenessInitialDelaySeconds())
-                    .createTcpProbe(settings.getLivenessTcpProbe());
-        }
-        if (withReadinessProbe) {
-            containerBuilder.addReadinessProbe()
-                    .setInitialDelaySeconds(settings.getReadinessInitialDelaySeconds())
-                    .createExecProbe("/bin/sh", "-i", "-c",
-                            settings.getReadinessProbeCommand());
-        }
-        if (withStartupProbe) {
-            containerBuilder.addStartupProbe()
-                    .setFailureThreshold(settings.getStartupFailureThreshold())
-                    .setPeriodSeconds(settings.getStartupPeriodSeconds())
-                    .createExecProbe("/bin/sh", "-i", "-c",
-                            settings.getStartupProbeCommand());
-        }
-    }
+  /** Get readiness and liveness probes settings. Override this for custom probe settings. */
+  protected ProbeSettings getProbeSettings() {
+    throw new UnsupportedOperationException("Specify settings for your database");
+  }
+  ;
 
-    /**
-     * Get readiness and liveness probes settings. Override this for custom probe settings.
-     */
-    protected ProbeSettings getProbeSettings() {
-        throw new UnsupportedOperationException("Specify settings for your database");
-    };
-
-    protected abstract String getJDBCConnectionStringPattern();
+  protected abstract String getJDBCConnectionStringPattern();
 }

@@ -10,12 +10,12 @@ import lombok.ToString;
 @ToString
 @AllArgsConstructor
 public class ProbeSettings {
-    private int livenessInitialDelaySeconds;
-    private String livenessTcpProbe;
-    private int readinessInitialDelaySeconds;
-    private String readinessProbeCommand;
-    private int startupInitialDelaySeconds;
-    private String startupProbeCommand;
-    private int startupFailureThreshold;
-    private int startupPeriodSeconds;
+  private int livenessInitialDelaySeconds;
+  private String livenessTcpProbe;
+  private int readinessInitialDelaySeconds;
+  private String readinessProbeCommand;
+  private int startupInitialDelaySeconds;
+  private String startupProbeCommand;
+  private int startupFailureThreshold;
+  private int startupPeriodSeconds;
 }

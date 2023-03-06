@@ -5,11 +5,11 @@ import org.junit.jupiter.api.Test;
 
 public class ConfiguredPathHelmBinaryResolverTest {
 
-    private HelmBinaryPathResolver configuredPathHelmBinaryResolver = new ConfiguredPathHelmBinaryResolver();
+  private HelmBinaryPathResolver configuredPathHelmBinaryResolver =
+      new ConfiguredPathHelmBinaryResolver();
 
-    @Test
-    public void resolveTest() {
-        Assertions.assertEquals("/tmp/helm", configuredPathHelmBinaryResolver.resolve());
-    }
-
+  @Test
+  public void resolveTest() {
+    Assertions.assertEquals("/tmp/helm", configuredPathHelmBinaryResolver.resolve());
+  }
 }

@@ -2,8 +2,7 @@ package cz.xtf.builder.builders.limits;
 
 public interface ResourceLimitBuilder {
 
-    ComputingResource addCPUResource();
+  ComputingResource addCPUResource();
 
-    ComputingResource addMemoryResource();
-
+  ComputingResource addMemoryResource();
 }
