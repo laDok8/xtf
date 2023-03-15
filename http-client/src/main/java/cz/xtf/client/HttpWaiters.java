@@ -1,12 +1,11 @@
 package cz.xtf.client;
 
-import java.io.IOException;
-import java.util.function.BooleanSupplier;
-import java.util.stream.Stream;
-
 import cz.xtf.core.config.WaitingConfig;
 import cz.xtf.core.waiting.SimpleWaiter;
 import cz.xtf.core.waiting.Waiter;
+import java.io.IOException;
+import java.util.function.BooleanSupplier;
+import java.util.stream.Stream;
 
 public class HttpWaiters {
     private final Http client;
@@ -40,8 +39,10 @@ public class HttpWaiters {
                 return false;
             }
         };
-        return new SimpleWaiter(bs,
-                "Waiting for " + client.getUrl().toExternalForm() + " to contain (" + String.join(",", strings) + ")")
-                        .timeout(WaitingConfig.timeout());
+        return new SimpleWaiter(
+                        bs,
+                        "Waiting for " + client.getUrl().toExternalForm() + " to contain (" + String.join(",", strings)
+                                + ")")
+                .timeout(WaitingConfig.timeout());
     }
 }

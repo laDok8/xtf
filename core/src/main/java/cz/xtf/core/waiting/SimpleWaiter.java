@@ -1,13 +1,11 @@
 package cz.xtf.core.waiting;
 
-import java.util.concurrent.TimeUnit;
-import java.util.function.BooleanSupplier;
-
-import org.slf4j.event.Level;
-
 import cz.xtf.core.config.WaitingConfig;
 import cz.xtf.core.waiting.failfast.ExponentialTimeBackoff;
 import cz.xtf.core.waiting.failfast.FailFastCheck;
+import java.util.concurrent.TimeUnit;
+import java.util.function.BooleanSupplier;
+import org.slf4j.event.Level;
 
 public class SimpleWaiter implements Waiter {
     private BooleanSupplier successCondition;
@@ -44,14 +42,10 @@ public class SimpleWaiter implements Waiter {
 
         this.failFast = () -> false;
 
-        this.onIteration = () -> {
-        };
-        this.onSuccess = () -> {
-        };
-        this.onFailure = () -> {
-        };
-        this.onTimeout = () -> {
-        };
+        this.onIteration = () -> {};
+        this.onSuccess = () -> {};
+        this.onFailure = () -> {};
+        this.onTimeout = () -> {};
 
         this.timeout = timeoutUnit.toMillis(timeout);
         this.interval = DEFAULT_INTERVAL;

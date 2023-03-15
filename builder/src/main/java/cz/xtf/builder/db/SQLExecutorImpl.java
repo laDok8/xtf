@@ -5,7 +5,6 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.function.Consumer;
-
 import org.apache.commons.io.IOUtils;
 
 public class SQLExecutorImpl implements SQLExecutor {
@@ -34,17 +33,17 @@ public class SQLExecutorImpl implements SQLExecutor {
     public void executeSQLFile(String resourceName) {
         executeSQL(db -> {
             try {
-                IOUtils.readLines(SQLExecutorImpl.class.getResourceAsStream(resourceName)).forEach(x -> {
-                    try {
-                        db.createStatement().execute(x);
-                    } catch (SQLException e) {
-                        throw new IllegalArgumentException(e);
-                    }
-                });
+                IOUtils.readLines(SQLExecutorImpl.class.getResourceAsStream(resourceName))
+                        .forEach(x -> {
+                            try {
+                                db.createStatement().execute(x);
+                            } catch (SQLException e) {
+                                throw new IllegalArgumentException(e);
+                            }
+                        });
             } catch (final IOException e) {
                 throw new IllegalStateException(e);
             }
         });
     }
-
 }

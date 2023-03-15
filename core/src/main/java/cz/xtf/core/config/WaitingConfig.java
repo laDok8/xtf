@@ -18,7 +18,8 @@ public class WaitingConfig {
     }
 
     public static Level level() {
-        return Level.valueOf(XTFConfig.get(WAITING_LOG_LEVEL, WAITING_LOG_LEVEL_DEFAULT).toUpperCase());
+        return Level.valueOf(
+                XTFConfig.get(WAITING_LOG_LEVEL, WAITING_LOG_LEVEL_DEFAULT).toUpperCase());
     }
 
     public static long timeoutCleanup() {

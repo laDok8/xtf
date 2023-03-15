@@ -1,5 +1,9 @@
 package cz.xtf.core.openshift;
 
+import cz.xtf.core.config.OpenShiftConfig;
+import cz.xtf.core.http.Https;
+import io.fabric8.kubernetes.client.KubernetesClientException;
+import io.fabric8.openshift.api.model.Route;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -9,15 +13,9 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.SystemUtils;
-
-import cz.xtf.core.config.OpenShiftConfig;
-import cz.xtf.core.http.Https;
-import io.fabric8.kubernetes.client.KubernetesClientException;
-import io.fabric8.openshift.api.model.Route;
-import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 class ClusterVersionOpenShiftBinaryPathResolver implements OpenShiftBinaryPathResolver {
@@ -30,14 +28,16 @@ class ClusterVersionOpenShiftBinaryPathResolver implements OpenShiftBinaryPathRe
         final boolean cacheEnabled = OpenShiftConfig.isBinaryCacheEnabled();
 
         final String clientUrl = determineClientUrl(clusterVersionInfo);
-        final Path archivePath = getCachedOrDownloadClientArchive(clientUrl,
+        final Path archivePath = getCachedOrDownloadClientArchive(
+                clientUrl,
                 clusterVersionInfo.getOpenshiftVersion() != null ? getVersionOrChannel(clusterVersionInfo) : "unknown",
                 cacheEnabled);
         return unpackOpenShiftClientArchive(archivePath, !cacheEnabled);
     }
 
     private String determineClientUrl(final ClusterVersionInfo versionInfo) {
-        log.debug("Trying to determine OpenShift client url for cluster version {}.", versionInfo.getOpenshiftVersion());
+        log.debug(
+                "Trying to determine OpenShift client url for cluster version {}.", versionInfo.getOpenshiftVersion());
         if (versionInfo.getOpenshiftVersion() != null) {
             return getClientUrlBasedOnOcpVersion(versionInfo);
         }
@@ -51,37 +51,45 @@ class ClusterVersionOpenShiftBinaryPathResolver implements OpenShiftBinaryPathRe
         if (openshiftVersion.startsWith("3")) {
             // OpenShift 3
             final String systemTypeForOCP3 = getSystemTypeForOCP3();
-            String downloadUrl = String.format("%s/%s/%s/oc.tar.gz", OCP3_CLIENTS_URL, openshiftVersion,
-                    systemTypeForOCP3);
-            // if the generated download URL is not working (404 or 403 response code) try to concatenate -1 to the version
+            String downloadUrl =
+                    String.format("%s/%s/%s/oc.tar.gz", OCP3_CLIENTS_URL, openshiftVersion, systemTypeForOCP3);
+            // if the generated download URL is not working (404 or 403 response code) try to concatenate -1 to the
+            // version
             final int code = Https.httpsGetCode(downloadUrl);
             if (code >= 400 && code < 500) {
-                downloadUrl = String.format("%s/%s-1/%s/oc.tar.gz", OCP3_CLIENTS_URL, openshiftVersion,
-                        systemTypeForOCP3);
+                downloadUrl =
+                        String.format("%s/%s-1/%s/oc.tar.gz", OCP3_CLIENTS_URL, openshiftVersion, systemTypeForOCP3);
             }
             return downloadUrl;
         } else {
             // OpenShift 4
 
             // https://mirror.openshift.com/pub/openshift-v4/clients/oc/$__DEPRECATED_LOCATION__PLEASE_READ__.txt
-            // Please direct x86_64 users and automation to the new oc client locations under: https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/
+            // Please direct x86_64 users and automation to the new oc client locations under:
+            // https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/
             //
             // This directory contains subdirectories for:
             // - The clients for released version of OpenShift v4; e.g.
-            //   - The clients for OpenShift release 4.6.4: https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/4.6.4/
+            //   - The clients for OpenShift release 4.6.4:
+            // https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/4.6.4/
             // - The latest client for a given OpenShift update channel; e.g.
-            //   - The latest in the 4.6 candidate channel: https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/candidate-4.6/
-            //   - The latest in the 4.5 stable channel: https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/stable-4.5/
+            //   - The latest in the 4.6 candidate channel:
+            // https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/candidate-4.6/
+            //   - The latest in the 4.5 stable channel:
+            // https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/stable-4.5/
             // - The latest client for the channels of the latest GA OpenShift release.
-            //   - The latest client for the most recent GA release's candidate channel: https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/candidate/
-            //   - The latest client for the most recent GA release's stable channel: https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/stable/
+            //   - The latest client for the most recent GA release's candidate channel:
+            // https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/candidate/
+            //   - The latest client for the most recent GA release's stable channel:
+            // https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/stable/
             //
-            // If you are looking for the latest stable release's client, please use: https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/stable/
+            // If you are looking for the latest stable release's client, please use:
+            // https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/stable/
 
             String downloadUrl = getOcp4DownloadUrl(versionInfo, getVersionOrChannel(versionInfo));
             final int code = Https.httpsGetCode(downloadUrl);
             if (code >= 400 && code < 500) {
-                //force to use stable
+                // force to use stable
                 downloadUrl = getOcp4DownloadUrl(versionInfo, getConfiguredChannel());
             }
             return downloadUrl;
@@ -89,9 +97,15 @@ class ClusterVersionOpenShiftBinaryPathResolver implements OpenShiftBinaryPathRe
     }
 
     private String getOcp4DownloadUrl(final ClusterVersionInfo versionInfo, final String versionOrChannel) {
-        final String ocFileName = SystemUtils.IS_OS_MAC ? "openshift-client-mac.tar.gz" : "openshift-client-linux.tar.gz";
-        return String.format("%s/%s/clients/%s/%s/%s", OCP4_CLIENTS_URL, getSystemTypeForOCP4(),
-                (versionInfo.isNightly() ? "ocp-dev-preview" : "ocp"), versionOrChannel, ocFileName);
+        final String ocFileName =
+                SystemUtils.IS_OS_MAC ? "openshift-client-mac.tar.gz" : "openshift-client-linux.tar.gz";
+        return String.format(
+                "%s/%s/clients/%s/%s/%s",
+                OCP4_CLIENTS_URL,
+                getSystemTypeForOCP4(),
+                (versionInfo.isNightly() ? "ocp-dev-preview" : "ocp"),
+                versionOrChannel,
+                ocFileName);
     }
 
     /**
@@ -106,20 +120,20 @@ class ClusterVersionOpenShiftBinaryPathResolver implements OpenShiftBinaryPathRe
         final String operatingSystem = SystemUtils.IS_OS_MAC ? "mac" : "linux";
 
         try {
-            final Optional<Route> downloadsRouteOptional = Optional
-                    .ofNullable(OpenShifts.admin("openshift-console").getRoute("downloads"));
-            final Route downloads = downloadsRouteOptional
-                    .orElseThrow(() -> new IllegalStateException("We are not able to find download link for OC binary."));
-            return String.format(locationTemplate,
-                    downloads.getSpec().getHost(),
-                    getSystemTypeForOCP4(),
-                    operatingSystem);
+            final Optional<Route> downloadsRouteOptional =
+                    Optional.ofNullable(OpenShifts.admin("openshift-console").getRoute("downloads"));
+            final Route downloads = downloadsRouteOptional.orElseThrow(
+                    () -> new IllegalStateException("We are not able to find download link for OC binary."));
+            return String.format(
+                    locationTemplate, downloads.getSpec().getHost(), getSystemTypeForOCP4(), operatingSystem);
         } catch (KubernetesClientException kce) {
             log.warn(
                     "It isn't possible to read 'downloads' route in 'openshift-console' namespace to get binary location. Attempting to guess it.",
                     kce);
-            // try to guess URL in case of insufficient permission to read route 'downloads' in 'openshift-console' namespace
-            return String.format(locationTemplate,
+            // try to guess URL in case of insufficient permission to read route 'downloads' in 'openshift-console'
+            // namespace
+            return String.format(
+                    locationTemplate,
                     OpenShifts.admin("openshift-console").generateHostname("downloads"),
                     systemType,
                     operatingSystem);
@@ -129,7 +143,9 @@ class ClusterVersionOpenShiftBinaryPathResolver implements OpenShiftBinaryPathRe
     private Path getCachedOrDownloadClientArchive(final String url, final String version, final boolean cacheEnabled) {
         Objects.requireNonNull(url);
 
-        log.debug("Trying to load OpenShift client archive from cache (enabled: {}) or download it from {}.", cacheEnabled,
+        log.debug(
+                "Trying to load OpenShift client archive from cache (enabled: {}) or download it from {}.",
+                cacheEnabled,
                 url);
         Path archivePath;
         if (cacheEnabled) {
@@ -158,8 +174,11 @@ class ClusterVersionOpenShiftBinaryPathResolver implements OpenShiftBinaryPathRe
         Objects.requireNonNull(archivePath);
 
         try {
-            List<String> args = Stream
-                    .of("tar", "-xf", archivePath.toAbsolutePath().toString(), "-C",
+            List<String> args = Stream.of(
+                            "tar",
+                            "-xf",
+                            archivePath.toAbsolutePath().toString(),
+                            "-C",
                             getProjectOcDir().toAbsolutePath().toString())
                     .collect(Collectors.toList());
             ProcessBuilder pb = new ProcessBuilder(args);
@@ -243,7 +262,9 @@ class ClusterVersionOpenShiftBinaryPathResolver implements OpenShiftBinaryPathRe
     private String getConfiguredChannel() {
         final String channel = OpenShiftConfig.binaryUrlChannelPath();
         // validate
-        if (!Stream.of("stable", "fast", "latest", "candidate").collect(Collectors.toList()).contains(channel)) {
+        if (!Stream.of("stable", "fast", "latest", "candidate")
+                .collect(Collectors.toList())
+                .contains(channel)) {
             throw new IllegalStateException(
                     "Channel (" + channel + ") configured in 'xtf.openshift.binary.url.channel' property is invalid.");
         }

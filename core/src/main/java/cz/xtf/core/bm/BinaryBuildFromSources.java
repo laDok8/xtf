@@ -2,6 +2,7 @@ package cz.xtf.core.bm;
 
 import static org.apache.commons.io.output.NullOutputStream.NULL_OUTPUT_STREAM;
 
+import cz.xtf.core.openshift.OpenShift;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,7 +27,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.ArchiveException;
@@ -37,14 +38,11 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.TrueFileFilter;
 
-import cz.xtf.core.openshift.OpenShift;
-import lombok.extern.slf4j.Slf4j;
-
 /**
  * Binary build that expect maven sources on path that shall be uploaded to OpenShift and built there.
  */
 @Slf4j
-abstract public class BinaryBuildFromSources extends BinaryBuild {
+public abstract class BinaryBuildFromSources extends BinaryBuild {
 
     private static final int OWNER_READ_FILEMODE = 0400;
     private static final int OWNER_WRITE_FILEMODE = 0200;
@@ -72,7 +70,11 @@ abstract public class BinaryBuildFromSources extends BinaryBuild {
             ExecutorService executorService = Executors.newSingleThreadExecutor();
             final Future<?> future = executorService.submit(() -> writeProjectTar(pos));
 
-            openShift.buildConfigs().withName(bc.getMetadata().getName()).instantiateBinary().fromInputStream(pis);
+            openShift
+                    .buildConfigs()
+                    .withName(bc.getMetadata().getName())
+                    .instantiateBinary()
+                    .fromInputStream(pis);
             future.get();
         } catch (IOException | InterruptedException | ExecutionException e) {
             log.error("Exception building {}", getId(), e);
@@ -89,7 +91,8 @@ abstract public class BinaryBuildFromSources extends BinaryBuild {
                 writeProjectTar(dos);
 
                 // kubernetes annotation value must not be longer than 63 chars
-                contentHash = Hex.encodeHexString(dos.getMessageDigest().digest()).substring(0, 63);
+                contentHash =
+                        Hex.encodeHexString(dos.getMessageDigest().digest()).substring(0, 63);
             } catch (NoSuchAlgorithmException e) {
                 throw new RuntimeException(e);
             }
@@ -99,10 +102,10 @@ abstract public class BinaryBuildFromSources extends BinaryBuild {
     }
 
     private void writeProjectTar(OutputStream os) {
-        Collection<File> filesToArchive = FileUtils.listFiles(getPath().toFile(), TrueFileFilter.INSTANCE,
-                TrueFileFilter.INSTANCE);
-        try (TarArchiveOutputStream o = (TarArchiveOutputStream) new ArchiveStreamFactory()
-                .createArchiveOutputStream(ArchiveStreamFactory.TAR, os)) {
+        Collection<File> filesToArchive =
+                FileUtils.listFiles(getPath().toFile(), TrueFileFilter.INSTANCE, TrueFileFilter.INSTANCE);
+        try (TarArchiveOutputStream o = (TarArchiveOutputStream)
+                new ArchiveStreamFactory().createArchiveOutputStream(ArchiveStreamFactory.TAR, os)) {
             o.setLongFileMode(TarArchiveOutputStream.LONGFILE_POSIX);
             o.setBigNumberMode(TarArchiveOutputStream.BIGNUMBER_POSIX);
             for (File f : filesToArchive) {
@@ -113,7 +116,8 @@ abstract public class BinaryBuildFromSources extends BinaryBuild {
                 // we force the modTime in the tar, so that the resulting tars are binary equal if their contents are
                 TarArchiveEntry tarArchiveEntry = (TarArchiveEntry) entry;
                 tarArchiveEntry.setModTime(Date.from(Instant.EPOCH));
-                PosixFileAttributes attrs = Files.getFileAttributeView(Paths.get(f.toURI()), PosixFileAttributeView.class)
+                PosixFileAttributes attrs = Files.getFileAttributeView(
+                                Paths.get(f.toURI()), PosixFileAttributeView.class)
                         .readAttributes();
                 tarArchiveEntry.setMode(toOctalFileMode(attrs.permissions()));
 

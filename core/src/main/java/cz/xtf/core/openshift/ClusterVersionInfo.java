@@ -1,12 +1,5 @@
 package cz.xtf.core.openshift;
 
-import java.util.Objects;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import org.apache.commons.lang3.StringUtils;
-import org.jboss.dmr.ModelNode;
-
 import cz.xtf.core.config.OpenShiftConfig;
 import cz.xtf.core.http.Https;
 import cz.xtf.core.http.HttpsException;
@@ -16,13 +9,18 @@ import io.fabric8.kubernetes.client.dsl.Resource;
 import io.fabric8.openshift.api.model.ClusterVersion;
 import io.fabric8.openshift.api.model.ClusterVersionList;
 import io.fabric8.openshift.client.OpenShiftHandlers;
+import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.jboss.dmr.ModelNode;
 
 @Slf4j
 public class ClusterVersionInfo {
     // version must be in format major.minor.micro (4.8.13) or major.minor (4.8)
-    private static final Pattern versionPattern = Pattern
-            .compile("^(\\d+\\.\\d+)(\\.\\d+)?(-\\d+\\.nightly-\\d{4}-\\d{2}-\\d{2}-\\d{6})?$");
+    private static final Pattern versionPattern =
+            Pattern.compile("^(\\d+\\.\\d+)(\\.\\d+)?(-\\d+\\.nightly-\\d{4}-\\d{2}-\\d{2}-\\d{6})?$");
     private final String openshiftVersion;
     private final Matcher versionMatcher;
 
@@ -84,7 +82,7 @@ public class ClusterVersionInfo {
 
     /**
      * Detects cluster version from cluster
-     * 
+     *
      * @return version of OpenShift cluster or null
      */
     private String detectClusterVersionFromCluster() {
@@ -110,15 +108,19 @@ public class ClusterVersionInfo {
 
             // it is OpenShift 3, parse version from gitVersion and convert it
             // example: v3.11.272 -> 3.11.272
-            openshiftVersion = ModelNode.fromJSONString(versionInfo).get("gitVersion").asString()
+            openshiftVersion = ModelNode.fromJSONString(versionInfo)
+                    .get("gitVersion")
+                    .asString()
                     .replaceAll("^v(.*)", "$1");
         } catch (HttpsException he) {
             // it is OpenShift 4+
             // admin is required for operation
             try {
-                NonNamespaceOperation<ClusterVersion, ClusterVersionList, Resource<ClusterVersion>> op = OpenShiftHandlers
-                        .getOperation(ClusterVersion.class, ClusterVersionList.class, OpenShifts.admin());
-                openshiftVersion = op.withName("version").get().getStatus().getDesired().getVersion();
+                NonNamespaceOperation<ClusterVersion, ClusterVersionList, Resource<ClusterVersion>> op =
+                        OpenShiftHandlers.getOperation(
+                                ClusterVersion.class, ClusterVersionList.class, OpenShifts.admin());
+                openshiftVersion =
+                        op.withName("version").get().getStatus().getDesired().getVersion();
             } catch (KubernetesClientException kce) {
                 log.warn("xtf.openshift.version isn't configured and automatic version detection failed.", kce);
             }
@@ -131,7 +133,9 @@ public class ClusterVersionInfo {
 
         Matcher matcher = versionPattern.matcher(version);
         if (!matcher.matches()) {
-            log.warn("Version {} configured in xtf.openshift.version isn't in expected format 'major.minor[.micro]'.", version);
+            log.warn(
+                    "Version {} configured in xtf.openshift.version isn't in expected format 'major.minor[.micro]'.",
+                    version);
         }
         return matcher;
     }

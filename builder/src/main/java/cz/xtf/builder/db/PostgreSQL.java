@@ -1,9 +1,8 @@
 package cz.xtf.builder.db;
 
-import java.util.Map;
-
 import cz.xtf.builder.builders.pod.PersistentVolumeClaim;
 import cz.xtf.core.image.Image;
+import java.util.Map;
 
 public class PostgreSQL extends AbstractSQLDatabase {
 
@@ -27,7 +26,10 @@ public class PostgreSQL extends AbstractSQLDatabase {
         super("POSTGRESQL", "/var/lib/pgsql/data", pvc, withLivenessProbe, withReadinessProbe);
     }
 
-    public PostgreSQL(PersistentVolumeClaim pvc, boolean withLivenessProbe, boolean withReadinessProbe,
+    public PostgreSQL(
+            PersistentVolumeClaim pvc,
+            boolean withLivenessProbe,
+            boolean withReadinessProbe,
             boolean withStartupProbe) {
         super("POSTGRESQL", "/var/lib/pgsql/data", pvc, withLivenessProbe, withReadinessProbe, withStartupProbe);
     }
@@ -40,7 +42,8 @@ public class PostgreSQL extends AbstractSQLDatabase {
         super(symbolicName, "/var/lib/pgsql/data", withLivenessProbe, withReadinessProbe);
     }
 
-    public PostgreSQL(String symbolicName, boolean withLivenessProbe, boolean withReadinessProbe, boolean withStartupProbe) {
+    public PostgreSQL(
+            String symbolicName, boolean withLivenessProbe, boolean withReadinessProbe, boolean withStartupProbe) {
         super(symbolicName, "/var/lib/pgsql/data", withLivenessProbe, withReadinessProbe, withStartupProbe, true);
     }
 
@@ -55,7 +58,8 @@ public class PostgreSQL extends AbstractSQLDatabase {
     }
 
     protected ProbeSettings getProbeSettings() {
-        return new ProbeSettings(300,
+        return new ProbeSettings(
+                300,
                 String.valueOf(getPort()),
                 5,
                 "psql -h 127.0.0.1 -U $POSTGRESQL_USER -q -d $POSTGRESQL_DATABASE -c 'SELECT 1'",

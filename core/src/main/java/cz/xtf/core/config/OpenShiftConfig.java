@@ -1,8 +1,7 @@
 package cz.xtf.core.config;
 
-import java.nio.file.Paths;
-
 import cz.xtf.core.openshift.OpenShifts;
+import java.nio.file.Paths;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -32,7 +31,8 @@ public final class OpenShiftConfig {
      * in case
      * where namespace is used in first part of URL of route which must have <64 chars length.
      */
-    public static final String OPENSHIFT_NAMESPACE_NAME_LENGTH_LIMIT = "xtf.openshift.namespace.per.testcase.length.limit";
+    public static final String OPENSHIFT_NAMESPACE_NAME_LENGTH_LIMIT =
+            "xtf.openshift.namespace.per.testcase.length.limit";
 
     /**
      * Used only if xtf.openshift.namespace.per.testcase=true - this property configures default maximum length of namespace
@@ -82,17 +82,19 @@ public final class OpenShiftConfig {
     public static boolean useNamespacePerTestCase() {
         return XTFConfig.get(OPENSHIFT_NAMESPACE_PER_TESTCASE) != null
                 && (XTFConfig.get(OPENSHIFT_NAMESPACE_PER_TESTCASE).equals("")
-                        || XTFConfig.get(OPENSHIFT_NAMESPACE_PER_TESTCASE).toLowerCase().equals("true"));
+                        || XTFConfig.get(OPENSHIFT_NAMESPACE_PER_TESTCASE)
+                                .toLowerCase()
+                                .equals("true"));
     }
 
     /**
      * Used only if xtf.openshift.namespace.per.testcase=true
-     * 
+     *
      * @return limit on namespace if it's set by -Dxtf.openshift.namespace.per.testcase.length.limit property
      */
     public static int getNamespaceLengthLimitForUniqueNamespacePerTest() {
-        return Integer.parseInt(XTFConfig.get(OPENSHIFT_NAMESPACE_NAME_LENGTH_LIMIT,
-                DEFAULT_OPENSHIFT_NAMESPACE_NAME_LENGTH_LIMIT));
+        return Integer.parseInt(
+                XTFConfig.get(OPENSHIFT_NAMESPACE_NAME_LENGTH_LIMIT, DEFAULT_OPENSHIFT_NAMESPACE_NAME_LENGTH_LIMIT));
     }
 
     public static String binaryPath() {
@@ -115,8 +117,12 @@ public final class OpenShiftConfig {
     }
 
     public static String binaryCachePath() {
-        return XTFConfig.get(OPENSHIFT_BINARY_CACHE_PATH, Paths.get(System.getProperty("java.io.tmpdir"),
-                OPENSHIFT_BINARY_CACHE_DEFAULT_FOLDER).toAbsolutePath().normalize().toString());
+        return XTFConfig.get(
+                OPENSHIFT_BINARY_CACHE_PATH,
+                Paths.get(System.getProperty("java.io.tmpdir"), OPENSHIFT_BINARY_CACHE_DEFAULT_FOLDER)
+                        .toAbsolutePath()
+                        .normalize()
+                        .toString());
     }
 
     public static String adminUsername() {

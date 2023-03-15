@@ -1,14 +1,13 @@
 package cz.xtf.builder.db;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import cz.xtf.builder.builders.ApplicationBuilder;
 import cz.xtf.builder.builders.DeploymentConfigBuilder;
 import cz.xtf.builder.builders.EnvironmentConfiguration;
 import cz.xtf.builder.builders.ServiceBuilder;
 import cz.xtf.builder.builders.pod.ContainerBuilder;
 import cz.xtf.builder.builders.pod.PersistentVolumeClaim;
+import java.util.HashMap;
+import java.util.Map;
 
 public abstract class AbstractDatabase extends DefaultStatefulAuxiliary {
     protected final String username;
@@ -30,20 +29,29 @@ public abstract class AbstractDatabase extends DefaultStatefulAuxiliary {
         this("testuser", "testpwd", "testdb", symbolicName, dataDir);
     }
 
-    public AbstractDatabase(String symbolicName, String dataDir, boolean withLivenessProbe, boolean withReadinessProbe) {
+    public AbstractDatabase(
+            String symbolicName, String dataDir, boolean withLivenessProbe, boolean withReadinessProbe) {
         this("testuser", "testpwd", "testdb", symbolicName, dataDir);
 
         this.withLivenessProbe = withLivenessProbe;
         this.withReadinessProbe = withReadinessProbe;
     }
 
-    public AbstractDatabase(String symbolicName, String dataDir, boolean withLivenessProbe, boolean withReadinessProbe,
+    public AbstractDatabase(
+            String symbolicName,
+            String dataDir,
+            boolean withLivenessProbe,
+            boolean withReadinessProbe,
             boolean configureEnvironment) {
         this(symbolicName, dataDir, withLivenessProbe, withReadinessProbe);
         this.configureEnvironment = configureEnvironment;
     }
 
-    public AbstractDatabase(String symbolicName, String dataDir, boolean withLivenessProbe, boolean withReadinessProbe,
+    public AbstractDatabase(
+            String symbolicName,
+            String dataDir,
+            boolean withLivenessProbe,
+            boolean withReadinessProbe,
             boolean withStartupProbe,
             boolean configureEnvironment) {
         this(symbolicName, dataDir);
@@ -57,7 +65,11 @@ public abstract class AbstractDatabase extends DefaultStatefulAuxiliary {
         this("testuser", "testpwd", "testdb", symbolicName, dataDir, pvc);
     }
 
-    public AbstractDatabase(String symbolicName, String dataDir, PersistentVolumeClaim pvc, boolean withLivenessProbe,
+    public AbstractDatabase(
+            String symbolicName,
+            String dataDir,
+            PersistentVolumeClaim pvc,
+            boolean withLivenessProbe,
             boolean withReadinessProbe) {
         this("testuser", "testpwd", "testdb", symbolicName, dataDir, pvc);
 
@@ -65,8 +77,13 @@ public abstract class AbstractDatabase extends DefaultStatefulAuxiliary {
         this.withReadinessProbe = withReadinessProbe;
     }
 
-    public AbstractDatabase(String symbolicName, String dataDir, PersistentVolumeClaim pvc, boolean withLivenessProbe,
-            boolean withReadinessProbe, boolean withStartupProbe) {
+    public AbstractDatabase(
+            String symbolicName,
+            String dataDir,
+            PersistentVolumeClaim pvc,
+            boolean withLivenessProbe,
+            boolean withReadinessProbe,
+            boolean withStartupProbe) {
         this("testuser", "testpwd", "testdb", symbolicName, dataDir, pvc);
 
         this.withLivenessProbe = withLivenessProbe;
@@ -78,7 +95,12 @@ public abstract class AbstractDatabase extends DefaultStatefulAuxiliary {
         this(username, password, dbName, symbolicName, dataDir, null);
     }
 
-    public AbstractDatabase(String username, String password, String dbName, String symbolicName, String dataDir,
+    public AbstractDatabase(
+            String username,
+            String password,
+            String dbName,
+            String symbolicName,
+            String dataDir,
             PersistentVolumeClaim pvc) {
         super(symbolicName, dataDir, pvc);
         this.username = username;
@@ -87,21 +109,42 @@ public abstract class AbstractDatabase extends DefaultStatefulAuxiliary {
         this.symbolicName = symbolicName;
     }
 
-    public AbstractDatabase(String username, String password, String dbName, String symbolicName, String dataDir,
-            boolean withLivenessProbe, boolean withReadinessProbe) {
+    public AbstractDatabase(
+            String username,
+            String password,
+            String dbName,
+            String symbolicName,
+            String dataDir,
+            boolean withLivenessProbe,
+            boolean withReadinessProbe) {
         this(username, password, dbName, symbolicName, dataDir);
         this.withLivenessProbe = withLivenessProbe;
         this.withReadinessProbe = withReadinessProbe;
     }
 
-    public AbstractDatabase(String username, String password, String dbName, String symbolicName, String dataDir,
-            boolean withLivenessProbe, boolean withReadinessProbe, boolean configureEnvironment) {
+    public AbstractDatabase(
+            String username,
+            String password,
+            String dbName,
+            String symbolicName,
+            String dataDir,
+            boolean withLivenessProbe,
+            boolean withReadinessProbe,
+            boolean configureEnvironment) {
         this(username, password, dbName, symbolicName, dataDir, withLivenessProbe, withReadinessProbe);
         this.configureEnvironment = configureEnvironment;
     }
 
-    public AbstractDatabase(String username, String password, String dbName, String symbolicName, String dataDir,
-            boolean withLivenessProbe, boolean withReadinessProbe, boolean withStartupProbe, boolean configureEnvironment) {
+    public AbstractDatabase(
+            String username,
+            String password,
+            String dbName,
+            String symbolicName,
+            String dataDir,
+            boolean withLivenessProbe,
+            boolean withReadinessProbe,
+            boolean withStartupProbe,
+            boolean configureEnvironment) {
         this(username, password, dbName, symbolicName, dataDir);
         this.configureEnvironment = configureEnvironment;
         this.withLivenessProbe = withLivenessProbe;
@@ -129,9 +172,7 @@ public abstract class AbstractDatabase extends DefaultStatefulAuxiliary {
         return password;
     }
 
-    protected void configureContainer(ContainerBuilder containerBuilder) {
-
-    }
+    protected void configureContainer(ContainerBuilder containerBuilder) {}
 
     public Map<String, String> getImageVariables() {
         final Map<String, String> vars = new HashMap<>();
@@ -163,7 +204,9 @@ public abstract class AbstractDatabase extends DefaultStatefulAuxiliary {
     }
 
     public void configureService(ApplicationBuilder appBuilder) {
-        final ServiceBuilder serviceBuilder = appBuilder.service(getDeploymentConfigName()).port(getPort())
+        final ServiceBuilder serviceBuilder = appBuilder
+                .service(getDeploymentConfigName())
+                .port(getPort())
                 .addContainerSelector("deploymentconfig", getDeploymentConfigName());
         if (external) {
             serviceBuilder.withoutSelectors();
@@ -177,7 +220,11 @@ public abstract class AbstractDatabase extends DefaultStatefulAuxiliary {
 
     public DeploymentConfigBuilder configureDeployment(ApplicationBuilder appBuilder, boolean synchronous) {
         final DeploymentConfigBuilder builder = appBuilder.deploymentConfig(getDeploymentConfigName());
-        builder.podTemplate().container().fromImage(getImageName()).envVars(getImageVariables()).port(getPort());
+        builder.podTemplate()
+                .container()
+                .fromImage(getImageName())
+                .envVars(getImageVariables())
+                .port(getPort());
         if (synchronous) {
             builder.onConfigurationChange();
             builder.synchronousDeployment();
@@ -189,9 +236,8 @@ public abstract class AbstractDatabase extends DefaultStatefulAuxiliary {
             storagePartition.configureApplicationDeployment(appBuilder, builder);
         }
         if (this.persistentVolClaim != null) {
-            builder.podTemplate().addPersistenVolumeClaim(
-                    this.persistentVolClaim.getName(),
-                    this.persistentVolClaim.getClaimName());
+            builder.podTemplate()
+                    .addPersistenVolumeClaim(this.persistentVolClaim.getName(), this.persistentVolClaim.getClaimName());
             builder.podTemplate().container().addVolumeMount(this.persistentVolClaim.getName(), dataDir, false);
         }
 
@@ -207,7 +253,8 @@ public abstract class AbstractDatabase extends DefaultStatefulAuxiliary {
             dbServiceMapping = dbServiceMapping.concat(",");
         }
         envConfig
-                .configEntry("DB_SERVICE_PREFIX_MAPPING",
+                .configEntry(
+                        "DB_SERVICE_PREFIX_MAPPING",
                         dbServiceMapping.concat(getDeploymentConfigName() + "=" + getEnvVarPrefix()))
                 .configEntry(getEnvVarName("USERNAME"), getUsername())
                 .configEntry(getEnvVarName("PASSWORD"), getPassword())

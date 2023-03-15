@@ -1,10 +1,9 @@
 package cz.xtf.junit5.extensions.helpers;
 
+import io.fabric8.kubernetes.api.model.HasMetadata;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.function.Predicate;
-
-import io.fabric8.kubernetes.api.model.HasMetadata;
 
 public class ResourcesFilterBuilder<E extends HasMetadata> implements Cloneable {
 
@@ -21,8 +20,10 @@ public class ResourcesFilterBuilder<E extends HasMetadata> implements Cloneable 
             case PREVIOUSLY_SEEN_RESOURCES:
                 return resource -> {
                     ZonedDateTime time = getResourceTime(resource);
-                    return (includeAlwaysAfter != null && includeAlwaysUntil != null && time.isAfter(includeAlwaysAfter)
-                            && !time.isAfter(includeAlwaysUntil))
+                    return (includeAlwaysAfter != null
+                                    && includeAlwaysUntil != null
+                                    && time.isAfter(includeAlwaysAfter)
+                                    && !time.isAfter(includeAlwaysUntil))
                             || (excludeUntil != null && time.isAfter(excludeUntil));
                 };
             default:

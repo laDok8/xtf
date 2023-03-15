@@ -1,10 +1,9 @@
 package cz.xtf.builder.builders;
 
-import org.apache.commons.lang3.StringUtils;
-
 import io.fabric8.openshift.api.model.Route;
 import io.fabric8.openshift.api.model.RouteSpecBuilder;
 import io.fabric8.openshift.api.model.TLSConfigBuilder;
+import org.apache.commons.lang3.StringUtils;
 
 public class RouteBuilder extends AbstractBuilder<Route, RouteBuilder> {
     private String hostName;
@@ -94,8 +93,8 @@ public class RouteBuilder extends AbstractBuilder<Route, RouteBuilder> {
         }
 
         if (tlsType != TLSType.NONE) {
-            TLSConfigBuilder tls = new TLSConfigBuilder()
-                    .withTermination(tlsType.toString().toLowerCase());
+            TLSConfigBuilder tls =
+                    new TLSConfigBuilder().withTermination(tlsType.toString().toLowerCase());
 
             if (StringUtils.isNotBlank(routeKey)) {
                 tls.withKey(routeKey);

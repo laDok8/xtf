@@ -1,13 +1,12 @@
 package cz.xtf.core.image;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import cz.xtf.core.config.XTFConfig;
 import io.fabric8.openshift.api.model.ImageStream;
 import io.fabric8.openshift.api.model.ImageStreamBuilder;
 import io.fabric8.openshift.api.model.TagReference;
 import io.fabric8.openshift.api.model.TagReferenceBuilder;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.Getter;
 
 @Getter
@@ -20,14 +19,12 @@ public class Image {
 
     public static Image resolve(String id) {
         Image image = Image.get(id);
-        if (image != null)
-            return image;
+        if (image != null) return image;
 
         String subid = XTFConfig.get("xtf." + id + ".subid");
 
         image = Image.get(id + "." + subid);
-        if (image == null)
-            throw new UnknownImageException("Unable to get image using " + id + " or " + subid);
+        if (image == null) throw new UnknownImageException("Unable to get image using " + id + " or " + subid);
 
         String customReg = XTFConfig.get("xtf." + id + ".reg");
         String customRegId = XTFConfig.get("xtf." + id + ".regid");
@@ -116,12 +113,26 @@ public class Image {
     public ImageStream getImageStream(String name, String... tags) {
         List<TagReference> tagRefs = new ArrayList<>(tags.length);
         for (String tag : tags) {
-            tagRefs.add(new TagReferenceBuilder().withName(tag).withNewImportPolicy().withInsecure(true).and().withNewFrom()
-                    .withKind("DockerImage").withName(url).endFrom().build());
+            tagRefs.add(new TagReferenceBuilder()
+                    .withName(tag)
+                    .withNewImportPolicy()
+                    .withInsecure(true)
+                    .and()
+                    .withNewFrom()
+                    .withKind("DockerImage")
+                    .withName(url)
+                    .endFrom()
+                    .build());
         }
-        return new ImageStreamBuilder().withNewMetadata().withName(name)
-                .addToAnnotations("openshift.io/image.insecureRepository", "true").and().withNewSpec().withTags(tagRefs)
-                .endSpec().build();
+        return new ImageStreamBuilder()
+                .withNewMetadata()
+                .withName(name)
+                .addToAnnotations("openshift.io/image.insecureRepository", "true")
+                .and()
+                .withNewSpec()
+                .withTags(tagRefs)
+                .endSpec()
+                .build();
     }
 
     public boolean isVersionAtLeast(String version) {

@@ -1,11 +1,10 @@
 package cz.xtf.builder.builders;
 
-import java.util.Collections;
-
 import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaimBuilder;
 import io.fabric8.kubernetes.api.model.Quantity;
+import java.util.Collections;
 
 public class PVCBuilder extends AbstractBuilder<PersistentVolumeClaim, PVCBuilder> {
 
@@ -42,8 +41,7 @@ public class PVCBuilder extends AbstractBuilder<PersistentVolumeClaim, PVCBuilde
 
     @Override
     public PersistentVolumeClaim build() {
-        ObjectMetaBuilder meta = new ObjectMetaBuilder()
-                .withName(getName());
+        ObjectMetaBuilder meta = new ObjectMetaBuilder().withName(getName());
 
         return new PersistentVolumeClaimBuilder()
                 .withMetadata(metadataBuilder().build())

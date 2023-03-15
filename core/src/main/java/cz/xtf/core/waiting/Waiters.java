@@ -1,7 +1,6 @@
 package cz.xtf.core.waiting;
 
 import java.util.concurrent.TimeUnit;
-
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -37,7 +36,5 @@ public final class Waiters {
         }
     }
 
-    private Waiters() {
-
-    }
+    private Waiters() {}
 }

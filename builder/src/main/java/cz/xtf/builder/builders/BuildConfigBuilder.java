@@ -1,13 +1,5 @@
 package cz.xtf.builder.builders;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import org.apache.commons.lang3.StringUtils;
-
 import cz.xtf.builder.builders.buildconfig.BuildStrategy;
 import cz.xtf.builder.builders.buildconfig.DockerBuildStrategy;
 import cz.xtf.builder.builders.buildconfig.ImageSource;
@@ -27,8 +19,15 @@ import io.fabric8.openshift.api.model.GitBuildSourceBuilder;
 import io.fabric8.openshift.api.model.ImageSourceBuilder;
 import io.fabric8.openshift.api.model.ImageSourceFluent.FromNested;
 import io.fabric8.openshift.api.model.SecretBuildSourceBuilder;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import org.apache.commons.lang3.StringUtils;
 
-public class BuildConfigBuilder extends AbstractBuilder<BuildConfig, BuildConfigBuilder> implements ResourceLimitBuilder {
+public class BuildConfigBuilder extends AbstractBuilder<BuildConfig, BuildConfigBuilder>
+        implements ResourceLimitBuilder {
     public static final String DEFAULT_SECRET = "secret101";
 
     private String gitUrl;
@@ -141,32 +140,39 @@ public class BuildConfigBuilder extends AbstractBuilder<BuildConfig, BuildConfig
 
         if (StringUtils.isNotBlank(genericSecret)) {
             triggers.add(new BuildTriggerPolicyBuilder()
-                    .withType("Generic").withNewGeneric().withAllowEnv(true).withSecret(genericSecret).endGeneric().build());
+                    .withType("Generic")
+                    .withNewGeneric()
+                    .withAllowEnv(true)
+                    .withSecret(genericSecret)
+                    .endGeneric()
+                    .build());
         }
 
         if (StringUtils.isNotBlank(githubSecret)) {
             triggers.add(new BuildTriggerPolicyBuilder()
-                    .withType("GitHub").withNewGithub().withAllowEnv(true).withSecret(githubSecret).endGithub().build());
+                    .withType("GitHub")
+                    .withNewGithub()
+                    .withAllowEnv(true)
+                    .withSecret(githubSecret)
+                    .endGithub()
+                    .build());
         }
 
         if (configChangeTrigger) {
-            triggers.add(new BuildTriggerPolicyBuilder()
-                    .withType("ConfigChange").build());
+            triggers.add(
+                    new BuildTriggerPolicyBuilder().withType("ConfigChange").build());
         }
 
         BuildSourceBuilder sourceBuilder = new BuildSourceBuilder();
         if (binaryBuild) {
-            sourceBuilder
-                    .withType("Binary").withBinary(new BinaryBuildSource());
+            sourceBuilder.withType("Binary").withBinary(new BinaryBuildSource());
         } else {
             // source
-            GitBuildSourceBuilder gitSourceBuilder = new GitBuildSourceBuilder()
-                    .withUri(gitUrl);
+            GitBuildSourceBuilder gitSourceBuilder = new GitBuildSourceBuilder().withUri(gitUrl);
             if (StringUtils.isNotBlank(gitRef)) {
                 gitSourceBuilder.withRef(gitRef);
             }
-            sourceBuilder.withType("Git")
-                    .withGit(gitSourceBuilder.build());
+            sourceBuilder.withType("Git").withGit(gitSourceBuilder.build());
         }
         if (StringUtils.isNotBlank(gitContextDir)) {
             sourceBuilder.withContextDir(gitContextDir);
@@ -183,41 +189,45 @@ public class BuildConfigBuilder extends AbstractBuilder<BuildConfig, BuildConfig
 
         if (imageSource != null) {
             final ImageSourceBuilder isb = new ImageSourceBuilder();
-            FromNested<ImageSourceBuilder> from = isb.withNewFrom()
-                    .withName(imageSource.getName())
-                    .withKind(imageSource.getKind());
+            FromNested<ImageSourceBuilder> from =
+                    isb.withNewFrom().withName(imageSource.getName()).withKind(imageSource.getKind());
             if (imageSource.getNamespace() != null) {
                 from.withNamespace(imageSource.getNamespace());
             }
             from.endFrom();
-            imageSource.getPaths().forEach(
-                    x -> isb.addNewPath().withDestinationDir(x.getDestinationPath())
-                            .withSourcePath(x.getSourcePath()).endPath());
+            imageSource.getPaths().forEach(x -> isb.addNewPath()
+                    .withDestinationDir(x.getDestinationPath())
+                    .withSourcePath(x.getSourcePath())
+                    .endPath());
             sourceBuilder.withImages(isb.build());
         }
 
-        final io.fabric8.openshift.api.model.BuildConfigBuilder builder = new io.fabric8.openshift.api.model.BuildConfigBuilder()
-                .withMetadata(metadataBuilder().build());
+        final io.fabric8.openshift.api.model.BuildConfigBuilder builder =
+                new io.fabric8.openshift.api.model.BuildConfigBuilder()
+                        .withMetadata(metadataBuilder().build());
 
         // spec
         final SpecNested<io.fabric8.openshift.api.model.BuildConfigBuilder> spec = builder.withNewSpec();
 
         // limits
-        final List<ComputingResource> requests = computingResources.values().stream().filter(x -> x.getRequests() != null)
+        final List<ComputingResource> requests = computingResources.values().stream()
+                .filter(x -> x.getRequests() != null)
                 .collect(Collectors.toList());
-        final List<ComputingResource> limits = computingResources.values().stream().filter(x -> x.getLimits() != null)
+        final List<ComputingResource> limits = computingResources.values().stream()
+                .filter(x -> x.getLimits() != null)
                 .collect(Collectors.toList());
         if (!requests.isEmpty() || !limits.isEmpty()) {
-            io.fabric8.openshift.api.model.BuildConfigSpecFluent.ResourcesNested<SpecNested<io.fabric8.openshift.api.model.BuildConfigBuilder>> resources = spec
-                    .withNewResources();
+            io.fabric8.openshift.api.model.BuildConfigSpecFluent.ResourcesNested<
+                            SpecNested<io.fabric8.openshift.api.model.BuildConfigBuilder>>
+                    resources = spec.withNewResources();
             if (!requests.isEmpty()) {
-                resources.withRequests(
-                        requests.stream().collect(Collectors.toMap(
+                resources.withRequests(requests.stream()
+                        .collect(Collectors.toMap(
                                 ComputingResource::resourceIdentifier, x -> new Quantity(x.getRequests()))));
             }
             if (!limits.isEmpty()) {
-                resources.withLimits(
-                        limits.stream().collect(Collectors.toMap(
+                resources.withLimits(limits.stream()
+                        .collect(Collectors.toMap(
                                 ComputingResource::resourceIdentifier, x -> new Quantity(x.getLimits()))));
             }
             resources.endResources();
@@ -235,10 +245,10 @@ public class BuildConfigBuilder extends AbstractBuilder<BuildConfig, BuildConfig
                 // to
                 .withNewOutput()
                 .withNewTo()
-                .withKind("ImageStreamTag").withName(output + ":latest")
+                .withKind("ImageStreamTag")
+                .withName(output + ":latest")
                 .endTo()
                 .endOutput()
-
                 .endSpec();
         return builder.build();
     }

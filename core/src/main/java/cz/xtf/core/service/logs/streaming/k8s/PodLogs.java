@@ -1,13 +1,12 @@
 package cz.xtf.core.service.logs.streaming.k8s;
 
+import cz.xtf.core.service.logs.streaming.ServiceLogs;
+import io.fabric8.kubernetes.client.KubernetesClient;
+import io.fabric8.kubernetes.client.Watch;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
-
-import cz.xtf.core.service.logs.streaming.ServiceLogs;
-import io.fabric8.kubernetes.client.KubernetesClient;
-import io.fabric8.kubernetes.client.Watch;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -53,8 +52,9 @@ public class PodLogs implements ServiceLogs {
                         namespace);
                 log.info(
                         "=============================================================================================================================");
-                Watch watch = client.pods().inNamespace(namespace).watch(
-                        new PodLogsWatcher.Builder()
+                Watch watch = client.pods()
+                        .inNamespace(namespace)
+                        .watch(new PodLogsWatcher.Builder()
                                 .withClient(client)
                                 .inNamespace(namespace)
                                 .outputTo(printStream)
@@ -93,7 +93,7 @@ public class PodLogs implements ServiceLogs {
 
         /**
          * Gets a {@link PrintStream} instance that will be passed on and used by the {@link PodLogs} instance
-         * 
+         *
          * @param printStream A {@link PrintStream} instance which will be used for streaming the service logs.
          *        It is expected that the {@link PrintStream} instance life cycle will be handled
          *        at the outer scope level, in the context and by the component which created it.

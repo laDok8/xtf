@@ -1,9 +1,8 @@
 package cz.xtf.builder.db;
 
-import java.util.Map;
-
 import cz.xtf.builder.builders.DeploymentConfigBuilder;
 import cz.xtf.core.image.Image;
+import java.util.Map;
 
 public class MongoDB extends AbstractDatabase {
 
@@ -36,5 +35,4 @@ public class MongoDB extends AbstractDatabase {
         vars.put(getSymbolicName() + "_ADMIN_PASSWORD", getPassword());
         return vars;
     }
-
 }

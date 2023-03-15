@@ -1,15 +1,5 @@
 package cz.xtf.core.namespace;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-import java.util.function.BooleanSupplier;
-
-import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.junit.jupiter.engine.descriptor.MethodBasedTestDescriptor;
-import org.junit.platform.engine.TestDescriptor;
-
 import cz.xtf.core.config.OpenShiftConfig;
 import cz.xtf.core.context.TestCaseContext;
 import cz.xtf.core.openshift.OpenShift;
@@ -19,13 +9,21 @@ import io.fabric8.kubernetes.api.builder.Visitor;
 import io.fabric8.kubernetes.api.model.Namespace;
 import io.fabric8.kubernetes.api.model.NamespaceBuilder;
 import io.fabric8.kubernetes.client.KubernetesClientException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.function.BooleanSupplier;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.junit.jupiter.engine.descriptor.MethodBasedTestDescriptor;
+import org.junit.platform.engine.TestDescriptor;
 
 @Slf4j
 public class NamespaceManager {
     /**
      * By default (xtf.openshift.namespace.per.testcase=false) all entries in map point to value returned by
-     * 
+     *
      * @see OpenShiftConfig#namespace(). If xtf.openshift.namespace.per.testcase=true then each entry points to namespace
      *      assigned to each test case by {@see NamespaceManager#getNamespaceForTestClass}
      *
@@ -78,13 +76,15 @@ public class NamespaceManager {
                 // permission for current user and updated namespace, e.g. by having 'cluster-admin' role.
                 // Otherwise you can see:
                 // $ oc label namespace <name> "label1=foo"
-                // Error from server (Forbidden): namespaces "<name>" is forbidden: User "<user>" cannot patch resource "namespaces" in API group "" in the namespace "<name>"
-                OpenShifts.admin(namespace).namespaces().withName(openShift.getProject().getMetadata().getName())
+                // Error from server (Forbidden): namespaces "<name>" is forbidden: User "<user>" cannot patch resource
+                // "namespaces" in API group "" in the namespace "<name>"
+                OpenShifts.admin(namespace)
+                        .namespaces()
+                        .withName(openShift.getProject().getMetadata().getName())
                         .edit(new Visitor<NamespaceBuilder>() {
                             @Override
                             public void visit(NamespaceBuilder builder) {
-                                builder.editMetadata()
-                                        .addToLabels(OpenShift.XTF_MANAGED_LABEL, "true");
+                                builder.editMetadata().addToLabels(OpenShift.XTF_MANAGED_LABEL, "true");
                             }
                         });
             } catch (KubernetesClientException e) {
@@ -106,7 +106,8 @@ public class NamespaceManager {
     }
 
     private static void checkAndWaitIfNamespaceIsTerminating(String namespace) {
-        Namespace n = OpenShifts.admin(namespace).namespaces().withName(namespace).get();
+        Namespace n =
+                OpenShifts.admin(namespace).namespaces().withName(namespace).get();
         if (n != null && n.getStatus().getPhase().equals("Terminating")) {
             waitForNamespaceToBeDeleted(namespace);
         }
@@ -116,7 +117,7 @@ public class NamespaceManager {
      * Deletes namespace as returned by @see #getNamespace
      *
      * @param waitForDeletion whether to wait for deletion (timeout 2 min)
-     * 
+     *
      * @return true if successful, false otherwise
      */
     public static boolean deleteProject(boolean waitForDeletion) {
@@ -133,13 +134,15 @@ public class NamespaceManager {
      */
     public static boolean deleteProject(String namespace, boolean waitForDeletion) {
         boolean deleted = false;
-        // problem with OpenShift.getProject() is that it might return null even if namespace still exists (is in terminating state)
+        // problem with OpenShift.getProject() is that it might return null even if namespace still exists (is in
+        // terminating state)
         // thus use Openshift.namespaces() which do not suffer by this problem
         // openshift.namespaces() requires admin privileges otherwise following KubernetesClientException is thrown:
         // ... User "xpaasqe" cannot get resource "namespaces" in API group "" in the namespace ...
         if (OpenShifts.admin(namespace).namespaces().withName(namespace).get() != null) {
             OpenShift openShift = OpenShifts.master(namespace);
-            log.info("Start deleting namespace: " + openShift.getNamespace() + ", wait for deletion: " + waitForDeletion);
+            log.info("Start deleting namespace: " + openShift.getNamespace() + ", wait for deletion: "
+                    + waitForDeletion);
             deleted = openShift.deleteProject();
             if (!deleted && waitForDeletion) {
                 waitForNamespaceToBeDeleted(namespace);
@@ -164,9 +167,9 @@ public class NamespaceManager {
     }
 
     private static void waitForNamespaceToBeDeleted(String namespace) {
-        BooleanSupplier bs = () -> OpenShifts.admin(namespace).namespaces().withName(namespace).get() == null;
-        new SimpleWaiter(bs, TimeUnit.MINUTES, 2, "Waiting for " + namespace + " project deletion")
-                .waitFor();
+        BooleanSupplier bs = () ->
+                OpenShifts.admin(namespace).namespaces().withName(namespace).get() == null;
+        new SimpleWaiter(bs, TimeUnit.MINUTES, 2, "Waiting for " + namespace + " project deletion").waitFor();
     }
 
     private static String getNamespaceForTestClass(TestDescriptor testDescriptor) {
@@ -177,17 +180,30 @@ public class NamespaceManager {
             // route prefix is: galleon-provisioning-xml-prio-mnovak-galleonprovisioningxmltest
             // route suffix is: .apps.eapqe-024-dryf.eapqe.psi.redhat.com
             if ((OpenShiftConfig.namespace() + "-"
-                    + testDescriptor.getParent().get().getDisplayName().toLowerCase())
-                            .length() > OpenShiftConfig.getNamespaceLengthLimitForUniqueNamespacePerTest()) {
+                                    + testDescriptor
+                                            .getParent()
+                                            .get()
+                                            .getDisplayName()
+                                            .toLowerCase())
+                            .length()
+                    > OpenShiftConfig.getNamespaceLengthLimitForUniqueNamespacePerTest()) {
 
                 return OpenShiftConfig.namespace() + "-"
-                        + StringUtils.truncate(DigestUtils.sha256Hex(testDescriptor.getParent().get().getDisplayName()
-                                .toLowerCase()),
+                        + StringUtils.truncate(
+                                DigestUtils.sha256Hex(testDescriptor
+                                        .getParent()
+                                        .get()
+                                        .getDisplayName()
+                                        .toLowerCase()),
                                 OpenShiftConfig.getNamespaceLengthLimitForUniqueNamespacePerTest()
                                         - OpenShiftConfig.namespace().length());
             } else {
                 return OpenShiftConfig.namespace() + "-"
-                        + testDescriptor.getParent().get().getDisplayName().toLowerCase(); // namespace must not have upper case letters
+                        + testDescriptor
+                                .getParent()
+                                .get()
+                                .getDisplayName()
+                                .toLowerCase(); // namespace must not have upper case letters
             }
         } else {
             return OpenShiftConfig.namespace();
@@ -200,8 +216,12 @@ public class NamespaceManager {
      * @param testDescriptor test descriptor
      */
     public static void addTestCaseToNamespaceEntryIfAbsent(TestDescriptor testDescriptor) {
-        getTestCaseToNamespaceMap().putIfAbsent(((MethodBasedTestDescriptor) testDescriptor).getTestClass().getName(),
-                getNamespaceForTestClass(testDescriptor));
+        getTestCaseToNamespaceMap()
+                .putIfAbsent(
+                        ((MethodBasedTestDescriptor) testDescriptor)
+                                .getTestClass()
+                                .getName(),
+                        getNamespaceForTestClass(testDescriptor));
     }
 
     /**

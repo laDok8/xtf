@@ -17,9 +17,6 @@ public class PersistentVolumeClaim extends Volume {
 
     @Override
     protected void addVolumeParameters(VolumeBuilder builder) {
-        builder.withNewPersistentVolumeClaim()
-                .withClaimName(getClaimName())
-                .endPersistentVolumeClaim();
+        builder.withNewPersistentVolumeClaim().withClaimName(getClaimName()).endPersistentVolumeClaim();
     }
-
 }

@@ -34,7 +34,11 @@ public class TestResultReporter implements TestExecutionListener {
         if (testIdentifier.isTest()) {
             String testId = testIdentifier.getUniqueId();
             String methodName = testIdentifier.getDisplayName();
-            String className = testIdentifier.getParentId().orElse("null").replaceAll(".*class:", "").replaceAll("].*", "");
+            String className = testIdentifier
+                    .getParentId()
+                    .orElse("null")
+                    .replaceAll(".*class:", "")
+                    .replaceAll("].*", "");
 
             testResultWriter.recordSkippedTest(testId, className, methodName, reason);
         }
@@ -45,19 +49,35 @@ public class TestResultReporter implements TestExecutionListener {
         if (testIdentifier.isTest()) {
             String testId = testIdentifier.getUniqueId();
             String methodName = testIdentifier.getDisplayName();
-            String className = testIdentifier.getParentId().orElse("null").replaceAll(".*class:", "").replaceAll("].*", "");
+            String className = testIdentifier
+                    .getParentId()
+                    .orElse("null")
+                    .replaceAll(".*class:", "")
+                    .replaceAll("].*", "");
 
             switch (testExecutionResult.getStatus()) {
                 case SUCCESSFUL:
                     testResultWriter.recordSuccessfulTest(testId, className, methodName);
                     break;
                 case FAILED:
-                    testResultWriter.recordFailedTest(testId, className, methodName, testExecutionResult.getThrowable()
-                            .orElseThrow(() -> new IllegalStateException("Failed test didn't throw anything!")));
+                    testResultWriter.recordFailedTest(
+                            testId,
+                            className,
+                            methodName,
+                            testExecutionResult
+                                    .getThrowable()
+                                    .orElseThrow(
+                                            () -> new IllegalStateException("Failed test didn't throw anything!")));
                     break;
                 case ABORTED:
-                    testResultWriter.recordSkippedTest(testId, className, methodName,
-                            testExecutionResult.getThrowable().orElse(new IllegalStateException()).getMessage());
+                    testResultWriter.recordSkippedTest(
+                            testId,
+                            className,
+                            methodName,
+                            testExecutionResult
+                                    .getThrowable()
+                                    .orElse(new IllegalStateException())
+                                    .getMessage());
                 default:
                     break;
             }

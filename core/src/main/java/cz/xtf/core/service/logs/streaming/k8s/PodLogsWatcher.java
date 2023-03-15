@@ -2,15 +2,6 @@ package cz.xtf.core.service.logs.streaming.k8s;
 
 import static java.util.stream.Collectors.toList;
 
-import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
 import cz.xtf.core.service.logs.streaming.ServiceLogColor;
 import cz.xtf.core.service.logs.streaming.ServiceLogColoredPrintStream;
 import cz.xtf.core.service.logs.streaming.ServiceLogUtils;
@@ -20,6 +11,14 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.Watcher;
 import io.fabric8.kubernetes.client.WatcherException;
 import io.fabric8.kubernetes.client.dsl.LogWatch;
+import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
@@ -54,106 +53,106 @@ class PodLogsWatcher implements Watcher<Pod> {
 
     /**
      * Handles newly running containers
-     * 
+     *
      * @param pod the Pod where to look for newly running containers
      */
     private void handleNewRunningContainers(Pod pod) {
         // existing containers running statuses
         List<ContainerStatus> existingContainersRunningStatuses = getRunningContainersStatuses(pod);
-        log.debug(ServiceLogUtils.getConventionallyPrefixedLogMessage(
-                String.format("existingContainersRunningStatuses.size=%s names=%s existingContainersRunningStatuses=%s",
-                        existingContainersRunningStatuses.size(),
-                        existingContainersRunningStatuses.stream().map(cs -> cs.getName()).collect(Collectors.joining()),
-                        existingContainersRunningStatuses)));
+        log.debug(ServiceLogUtils.getConventionallyPrefixedLogMessage(String.format(
+                "existingContainersRunningStatuses.size=%s names=%s existingContainersRunningStatuses=%s",
+                existingContainersRunningStatuses.size(),
+                existingContainersRunningStatuses.stream()
+                        .map(cs -> cs.getName())
+                        .collect(Collectors.joining()),
+                existingContainersRunningStatuses)));
         // newly running containers statuses
-        List<ContainerStatus> newContainersRunningStatuses = getNewContainers(runningStatusesBefore,
-                existingContainersRunningStatuses);
-        log.debug(ServiceLogUtils.getConventionallyPrefixedLogMessage(
-                String.format("newContainersRunningStatuses.size=%s names=%s newContainersRunningStatuses=%s",
-                        newContainersRunningStatuses.size(),
-                        newContainersRunningStatuses.stream().map(cs -> cs.getName()).collect(Collectors.joining()),
-                        newContainersRunningStatuses)));
+        List<ContainerStatus> newContainersRunningStatuses =
+                getNewContainers(runningStatusesBefore, existingContainersRunningStatuses);
+        log.debug(ServiceLogUtils.getConventionallyPrefixedLogMessage(String.format(
+                "newContainersRunningStatuses.size=%s names=%s newContainersRunningStatuses=%s",
+                newContainersRunningStatuses.size(),
+                newContainersRunningStatuses.stream().map(cs -> cs.getName()).collect(Collectors.joining()),
+                newContainersRunningStatuses)));
         // let's update the currently running containers
         runningStatusesBefore = existingContainersRunningStatuses;
         // now let's create and start the LogWatch instances that will monitor the containers' logs
         for (ContainerStatus status : newContainersRunningStatuses) {
-            log.info(ServiceLogUtils.getConventionallyPrefixedLogMessage(
-                    String.format("Container %s.%s.%s running...", namespace, pod.getMetadata().getName(), status.getName())));
-            log.debug(ServiceLogUtils.getConventionallyPrefixedLogMessage(
-                    String.format(
-                            "CONTAINER status: name=%s, started=%s, ready=%s \n\t waiting=%s \n\t running=%s \n\t terminated=%s \n\t complete status=%s",
-                            status.getName(),
-                            status.getStarted(),
-                            status.getReady(),
-                            status.getState().getWaiting(),
-                            status.getState().getRunning(),
-                            status.getState().getTerminated(),
-                            pod.getStatus())));
+            log.info(ServiceLogUtils.getConventionallyPrefixedLogMessage(String.format(
+                    "Container %s.%s.%s running...",
+                    namespace, pod.getMetadata().getName(), status.getName())));
+            log.debug(ServiceLogUtils.getConventionallyPrefixedLogMessage(String.format(
+                    "CONTAINER status: name=%s, started=%s, ready=%s \n\t waiting=%s \n\t running=%s \n\t terminated=%s \n\t complete status=%s",
+                    status.getName(),
+                    status.getStarted(),
+                    status.getReady(),
+                    status.getState().getWaiting(),
+                    status.getState().getRunning(),
+                    status.getState().getTerminated(),
+                    pod.getStatus())));
             if (filter != null && filter.matcher(pod.getMetadata().getName()).matches()) {
-                log.info(ServiceLogUtils.getConventionallyPrefixedLogMessage(
-                        String.format("Skipped Pod %s.%s", namespace, pod.getMetadata().getName())));
+                log.info(ServiceLogUtils.getConventionallyPrefixedLogMessage(String.format(
+                        "Skipped Pod %s.%s", namespace, pod.getMetadata().getName())));
                 continue;
             }
             if (filter != null && filter.matcher(status.getName()).matches()) {
-                log.info(ServiceLogUtils.getConventionallyPrefixedLogMessage(
-                        String.format("Skipped Container %s.%s.%s", namespace, pod.getMetadata().getName(), status.getName())));
+                log.info(ServiceLogUtils.getConventionallyPrefixedLogMessage(String.format(
+                        "Skipped Container %s.%s.%s",
+                        namespace, pod.getMetadata().getName(), status.getName())));
                 continue;
             }
-            final LogWatch lw = client.pods().inNamespace(namespace).withName(pod.getMetadata().getName())
+            final LogWatch lw = client.pods()
+                    .inNamespace(namespace)
+                    .withName(pod.getMetadata().getName())
                     .inContainer(status.getName())
                     .tailingLines(LOG_TAILING_LINES)
                     .withLogWaitTimeout(LOG_WAIT_TIMEOUT)
-                    .watchLog(
-                            new ServiceLogColoredPrintStream.Builder()
-                                    .outputTo(printStream)
-                                    .withColor(ServiceLogColor.getNext())
-                                    .withPrefix(
-                                            forgeContainerLogPrefix(pod, status))
-                                    .build());
+                    .watchLog(new ServiceLogColoredPrintStream.Builder()
+                            .outputTo(printStream)
+                            .withColor(ServiceLogColor.getNext())
+                            .withPrefix(forgeContainerLogPrefix(pod, status))
+                            .build());
             logWatches.put(status.getContainerID(), lw);
-            log.debug(ServiceLogUtils.getConventionallyPrefixedLogMessage(
-                    String.format("PodLogsWatcher started for Container %s in Pod %s in Namespace %s",
-                            status.getName(),
-                            pod.getMetadata().getName(),
-                            namespace)));
+            log.debug(ServiceLogUtils.getConventionallyPrefixedLogMessage(String.format(
+                    "PodLogsWatcher started for Container %s in Pod %s in Namespace %s",
+                    status.getName(), pod.getMetadata().getName(), namespace)));
         }
     }
 
     private String forgeContainerLogPrefix(Pod pod, ContainerStatus status) {
-        return String.format("%s.%s.%s",
-                namespace,
-                pod.getMetadata().getName(),
-                status.getName());
+        return String.format("%s.%s.%s", namespace, pod.getMetadata().getName(), status.getName());
     }
 
     /**
      * Handles newly terminated containers
-     * 
+     *
      * @param pod the Pod where to look for newly terminated containers
      */
     private void handleNewTerminatedContainers(Pod pod) {
         // existing containers terminated statuses
         List<ContainerStatus> existingContainersTerminatedStatuses = getTerminatedContainers(pod);
-        log.debug(ServiceLogUtils.getConventionallyPrefixedLogMessage(
-                String.format("existingContainersTerminatedStatuses.size=%s names=%s existingContainersTerminatedStatuses=%s",
-                        existingContainersTerminatedStatuses.size(),
-                        existingContainersTerminatedStatuses.stream().map(cs -> cs.getName()).collect(Collectors.joining()),
-                        existingContainersTerminatedStatuses)));
+        log.debug(ServiceLogUtils.getConventionallyPrefixedLogMessage(String.format(
+                "existingContainersTerminatedStatuses.size=%s names=%s existingContainersTerminatedStatuses=%s",
+                existingContainersTerminatedStatuses.size(),
+                existingContainersTerminatedStatuses.stream()
+                        .map(cs -> cs.getName())
+                        .collect(Collectors.joining()),
+                existingContainersTerminatedStatuses)));
         // newly terminated containers statuses
-        List<ContainerStatus> newContainersTerminatedStatuses = getNewContainers(terminatedStatusesBefore,
-                existingContainersTerminatedStatuses);
-        log.debug(ServiceLogUtils.getConventionallyPrefixedLogMessage(
-                String.format("newContainersTerminatedStatuses.size=%s names=%s newContainersTerminatedStatuses=%s",
-                        newContainersTerminatedStatuses.size(),
-                        newContainersTerminatedStatuses.stream().map(cs -> cs.getName()).collect(Collectors.joining()),
-                        newContainersTerminatedStatuses)));
+        List<ContainerStatus> newContainersTerminatedStatuses =
+                getNewContainers(terminatedStatusesBefore, existingContainersTerminatedStatuses);
+        log.debug(ServiceLogUtils.getConventionallyPrefixedLogMessage(String.format(
+                "newContainersTerminatedStatuses.size=%s names=%s newContainersTerminatedStatuses=%s",
+                newContainersTerminatedStatuses.size(),
+                newContainersTerminatedStatuses.stream().map(cs -> cs.getName()).collect(Collectors.joining()),
+                newContainersTerminatedStatuses)));
         // let's update the currently terminated containers
         terminatedStatusesBefore = existingContainersTerminatedStatuses;
         // now let's terminate the LogWatch instances that are monitoring the containers' logs
         for (ContainerStatus status : newContainersTerminatedStatuses) {
-            log.info(ServiceLogUtils.getConventionallyPrefixedLogMessage(
-                    String.format("Container %s.%s.%s was terminated!", namespace, pod.getMetadata().getName(),
-                            status.getName())));
+            log.info(ServiceLogUtils.getConventionallyPrefixedLogMessage(String.format(
+                    "Container %s.%s.%s was terminated!",
+                    namespace, pod.getMetadata().getName(), status.getName())));
             if (logWatches.containsKey(status.getContainerID())) {
                 // the log watch must be closed so that internal resources are managed properly (e.g.:
                 // `Closeable` instances will be closed)
@@ -189,14 +188,16 @@ class PodLogsWatcher implements Watcher<Pod> {
 
     /**
      * Gets <i>just</i> new containers statuses by filtering the existing ones out.
-     * 
+     *
      * @param before A list of {@link ContainerStatus} instances belonging to already existing containers
      * @param now A list of {@link ContainerStatus} instances belonging to new containers
      * @return A list of {@link ContainerStatus} instances representing the difference between those belonging to
      *         new containers and the existing ones, at a given moment in time.
      */
-    private List<ContainerStatus> getNewContainers(final List<ContainerStatus> before, final List<ContainerStatus> now) {
-        List<String> namesBefore = before.stream().map(cs -> cs.getContainerID()).collect(Collectors.toList());
+    private List<ContainerStatus> getNewContainers(
+            final List<ContainerStatus> before, final List<ContainerStatus> now) {
+        List<String> namesBefore =
+                before.stream().map(cs -> cs.getContainerID()).collect(Collectors.toList());
         return now.stream()
                 .filter(element -> !namesBefore.contains(element.getContainerID()))
                 .collect(Collectors.toList());
@@ -210,12 +211,12 @@ class PodLogsWatcher implements Watcher<Pod> {
      */
     private List<ContainerStatus> getTerminatedContainers(final Pod pod) {
         final List<ContainerStatus> containers = new ArrayList<>();
-        containers.addAll(
-                pod.getStatus().getInitContainerStatuses().stream().filter(
-                        containerStatus -> containerStatus.getState().getTerminated() != null).collect(toList()));
-        containers.addAll(
-                pod.getStatus().getContainerStatuses().stream().filter(
-                        containerStatus -> containerStatus.getState().getTerminated() != null).collect(toList()));
+        containers.addAll(pod.getStatus().getInitContainerStatuses().stream()
+                .filter(containerStatus -> containerStatus.getState().getTerminated() != null)
+                .collect(toList()));
+        containers.addAll(pod.getStatus().getContainerStatuses().stream()
+                .filter(containerStatus -> containerStatus.getState().getTerminated() != null)
+                .collect(toList()));
         return containers;
     }
 
@@ -227,23 +228,22 @@ class PodLogsWatcher implements Watcher<Pod> {
      */
     private List<ContainerStatus> getRunningContainersStatuses(final Pod pod) {
         final List<ContainerStatus> statuses = new ArrayList<>();
-        statuses.addAll(
-                pod.getStatus().getInitContainerStatuses().stream().filter(
-                        containerStatus -> containerStatus.getState().getRunning() != null).collect(toList()));
-        statuses.addAll(
-                pod.getStatus().getContainerStatuses().stream().filter(
-                        containerStatus -> containerStatus.getState().getRunning() != null).collect(toList()));
+        statuses.addAll(pod.getStatus().getInitContainerStatuses().stream()
+                .filter(containerStatus -> containerStatus.getState().getRunning() != null)
+                .collect(toList()));
+        statuses.addAll(pod.getStatus().getContainerStatuses().stream()
+                .filter(containerStatus -> containerStatus.getState().getRunning() != null)
+                .collect(toList()));
         return statuses;
     }
 
     @Override
     public void onClose(WatcherException e) {
-        logWatches.forEach(
-                (s, logWatch) -> {
-                    // the log watch must be closed so that internal resources are managed properly (e.g.:
-                    // `Closeable` instances will be closed)
-                    logWatch.close();
-                });
+        logWatches.forEach((s, logWatch) -> {
+            // the log watch must be closed so that internal resources are managed properly (e.g.:
+            // `Closeable` instances will be closed)
+            logWatch.close();
+        });
         log.debug(ServiceLogUtils.getConventionallyPrefixedLogMessage("Terminating PodLogsWatcher"));
     }
 

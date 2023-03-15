@@ -1,16 +1,14 @@
 package cz.xtf.junit5.extensions;
 
+import cz.xtf.core.config.XTFConfig;
+import cz.xtf.junit5.annotations.SkipFor;
 import java.util.Arrays;
 import java.util.stream.Stream;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.api.extension.ExtendWith;
-
-import cz.xtf.core.config.XTFConfig;
-import cz.xtf.junit5.annotations.SkipFor;
 import uk.org.webcompere.systemstubs.jupiter.SystemStub;
 import uk.org.webcompere.systemstubs.jupiter.SystemStubsExtension;
 import uk.org.webcompere.systemstubs.properties.SystemProperties;
@@ -29,59 +27,69 @@ class SkipForConditionTest {
     }
 
     @SkipFor(image = "eap", name = ".*eap-74.*", reason = "This test is skipped based on the image name.")
-    class WellAnnotatedImageNameBasedSkipTest {
+    class WellAnnotatedImageNameBasedSkipTest {}
 
-    }
+    @SkipFor(
+            image = "eap",
+            imageMetadataLabelName = "centos7/s2i-base-centos7",
+            reason = "This test is skipped based on the image docker labels")
+    class WellAnnotatedImageMetadataLabelBasedSkipTest {}
 
-    @SkipFor(image = "eap", imageMetadataLabelName = "centos7/s2i-base-centos7", reason = "This test is skipped based on the image docker labels")
-    class WellAnnotatedImageMetadataLabelBasedSkipTest {
-
-    }
-
-    @SkipFor(image = "eap", imageMetadataLabelArchitecture = "s390x", reason = "This test is skipped based on the image metadata label architecture")
-    class WellAnnotatedImageMetadataLabelArchitectureBasedSkipTest {
-
-    }
+    @SkipFor(
+            image = "eap",
+            imageMetadataLabelArchitecture = "s390x",
+            reason = "This test is skipped based on the image metadata label architecture")
+    class WellAnnotatedImageMetadataLabelArchitectureBasedSkipTest {}
 
     @SkipFor(image = "eap", subId = ".*74.*", reason = "This test is skipped based on the image product subId")
-    class WellAnnotatedSubIdBasedSkipTest {
+    class WellAnnotatedSubIdBasedSkipTest {}
 
-    }
+    @SkipFor(
+            image = "eap",
+            name = ".*eap-xp1.*",
+            imageMetadataLabelName = "centos7/s2i-base-centos7",
+            reason = "This test SHOULD BE skipped based on the image name.")
+    class BadlyAnnotatedImageNameBasedSkipTest {}
 
-    @SkipFor(image = "eap", name = ".*eap-xp1.*", imageMetadataLabelName = "centos7/s2i-base-centos7", reason = "This test SHOULD BE skipped based on the image name.")
-    class BadlyAnnotatedImageNameBasedSkipTest {
+    @SkipFor(
+            image = "eap",
+            name = ".*eap-xp1.*",
+            imageMetadataLabelName = "centos7/s2i-base-centos7",
+            reason = "This test SHOULD BE skipped based on the image docker labels")
+    class BadlyAnnotatedImageMetadataLabelBasedSkipTest {}
 
-    }
+    @SkipFor(
+            image = "eap",
+            name = ".*eap-xp4.*",
+            imageMetadataLabelArchitecture = "s390x",
+            reason = "This test SHOULD BE skipped based on the image metadata label architecture")
+    class BadlyAnnotatedImageMetadataLabelArchitectureBasedSkipTest {}
 
-    @SkipFor(image = "eap", name = ".*eap-xp1.*", imageMetadataLabelName = "centos7/s2i-base-centos7", reason = "This test SHOULD BE skipped based on the image docker labels")
-    class BadlyAnnotatedImageMetadataLabelBasedSkipTest {
-
-    }
-
-    @SkipFor(image = "eap", name = ".*eap-xp4.*", imageMetadataLabelArchitecture = "s390x", reason = "This test SHOULD BE skipped based on the image metadata label architecture")
-    class BadlyAnnotatedImageMetadataLabelArchitectureBasedSkipTest {
-
-    }
-
-    @SkipFor(image = "eap", name = ".*eap-xp1.*", imageMetadataLabelName = "centos7/s2i-base-centos7", subId = ".*74.*", reason = "This test SHOULD BE skipped based on the image product subId")
-    class BadlyAnnotatedSubIdBasedSkipTest {
-
-    }
+    @SkipFor(
+            image = "eap",
+            name = ".*eap-xp1.*",
+            imageMetadataLabelName = "centos7/s2i-base-centos7",
+            subId = ".*74.*",
+            reason = "This test SHOULD BE skipped based on the image product subId")
+    class BadlyAnnotatedSubIdBasedSkipTest {}
 
     @Test
     void testUniqueCriteriaResolutionOnWellAnnotatedClasses() {
         Stream<Class> workingClasses = Stream.of(
                 WellAnnotatedImageNameBasedSkipTest.class,
-                // imageMetadataLabelName and imageMetadataLabelArchitecture try to fetch docker metadata, so they require connection to openshift
+                // imageMetadataLabelName and imageMetadataLabelArchitecture try to fetch docker metadata, so they
+                // require connection to openshift
                 // WellAnnotatedImageMetadataLabelBasedSkipTest.class,
                 // WellAnnotatedImageMetadataLabelArchitectureBasedSkipTest.class,
                 WellAnnotatedSubIdBasedSkipTest.class);
         workingClasses.forEach(k -> {
             try {
-                SkipForCondition.resolve((SkipFor) Arrays.stream(k.getAnnotationsByType(SkipFor.class)).findFirst().get());
+                SkipForCondition.resolve((SkipFor) Arrays.stream(k.getAnnotationsByType(SkipFor.class))
+                        .findFirst()
+                        .get());
             } catch (RuntimeException re) {
-                Assertions.fail(String.format("No exception is expected when resolving %s \"@SkipFor\" annotation",
-                        k.getSimpleName()));
+                Assertions.fail(String.format(
+                        "No exception is expected when resolving %s \"@SkipFor\" annotation", k.getSimpleName()));
             }
         });
     }
@@ -94,8 +102,11 @@ class SkipForConditionTest {
                 BadlyAnnotatedImageMetadataLabelArchitectureBasedSkipTest.class,
                 BadlyAnnotatedSubIdBasedSkipTest.class);
         workingClasses.forEach(k -> {
-            Exception exception = Assertions.assertThrows(RuntimeException.class, () -> SkipForCondition
-                    .resolve((SkipFor) Arrays.stream(k.getAnnotationsByType(SkipFor.class)).findFirst().get()));
+            Exception exception = Assertions.assertThrows(
+                    RuntimeException.class,
+                    () -> SkipForCondition.resolve((SkipFor) Arrays.stream(k.getAnnotationsByType(SkipFor.class))
+                            .findFirst()
+                            .get()));
             Assertions.assertEquals(
                     "Only one of 'name', 'imageMetadataLabelName', 'imageMetadataLabelArchitecture' and 'subId' can be presented in 'SkipFor' annotation.",
                     exception.getMessage());
@@ -105,7 +116,9 @@ class SkipForConditionTest {
     @Test
     void testSubIdBasedSkipForResolution() {
         ConditionEvaluationResult conditionEvaluationResult = SkipForCondition.resolve(
-                Arrays.stream(WellAnnotatedSubIdBasedSkipTest.class.getAnnotationsByType(SkipFor.class)).findFirst().get());
+                Arrays.stream(WellAnnotatedSubIdBasedSkipTest.class.getAnnotationsByType(SkipFor.class))
+                        .findFirst()
+                        .get());
         Assertions.assertTrue(conditionEvaluationResult.isDisabled(), "This test should be disabled via \"subId\"");
     }
 }

@@ -1,12 +1,11 @@
 package cz.xtf.core.openshift;
 
+import cz.xtf.core.config.OpenShiftConfig;
+import cz.xtf.core.config.XTFConfig;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-
-import cz.xtf.core.config.OpenShiftConfig;
-import cz.xtf.core.config.XTFConfig;
 import uk.org.webcompere.systemstubs.jupiter.SystemStub;
 import uk.org.webcompere.systemstubs.jupiter.SystemStubsExtension;
 import uk.org.webcompere.systemstubs.properties.SystemProperties;

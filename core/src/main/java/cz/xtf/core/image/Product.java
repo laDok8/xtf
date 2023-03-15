@@ -47,8 +47,8 @@ public class Product {
 
     private String resolveDefaultingProperty(String propertyId) {
         String value = XTFConfig.get("xtf." + id + "." + propertyId);
-        String defaultingValue = id.contains(".") ? XTFConfig.get("xtf." + id.replaceAll("\\..*", "") + "." + propertyId)
-                : null;
+        String defaultingValue =
+                id.contains(".") ? XTFConfig.get("xtf." + id.replaceAll("\\..*", "") + "." + propertyId) : null;
 
         return value != null ? value : defaultingValue;
     }

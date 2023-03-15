@@ -12,7 +12,7 @@ public interface FailFastCheck {
     /**
      * @return reason why {@link FailFastCheck#hasFailed()} have returned {@code true}
      */
-    default public String reason() {
+    public default String reason() {
         return "reason not specified";
     }
 }

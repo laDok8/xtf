@@ -6,11 +6,9 @@ import java.io.StringWriter;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.util.Arrays;
-
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.RandomUtils;
-
-import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class ContentHash {
@@ -39,14 +37,13 @@ public class ContentHash {
             throw new IOException("Failed to calculate hash via: " + Arrays.toString(args));
         }
 
-        try (InputStream is = p.getInputStream(); StringWriter sw = new StringWriter()) {
+        try (InputStream is = p.getInputStream();
+                StringWriter sw = new StringWriter()) {
             IOUtils.copy(is, sw, Charset.defaultCharset());
             return sw.toString();
         }
     }
 
     // Static helper class
-    private ContentHash() {
-
-    }
+    private ContentHash() {}
 }

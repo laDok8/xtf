@@ -1,14 +1,13 @@
 package cz.xtf.builder.builders;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import cz.xtf.builder.builders.route.TransportProtocol;
 import io.fabric8.kubernetes.api.model.EndpointAddressBuilder;
 import io.fabric8.kubernetes.api.model.EndpointPortBuilder;
 import io.fabric8.kubernetes.api.model.EndpointSubsetBuilder;
 import io.fabric8.kubernetes.api.model.Endpoints;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -45,16 +44,20 @@ public class EndpointBuilder extends AbstractBuilder<Endpoints, EndpointBuilder>
         }
 
         EndpointSubsetBuilder subset = new EndpointSubsetBuilder()
-                .withAddresses(endpointIPs.stream().map(ip -> new EndpointAddressBuilder()
-                        .withIp(ip).build()).collect(Collectors.toList()))
-                .withPorts(ports.stream().map(port -> new EndpointPortBuilder()
-                        .withPort(port.getPort())
-                        .withProtocol(port.getTransportProtocol().toString())
-                        .build()).collect(Collectors.toList()));
+                .withAddresses(endpointIPs.stream()
+                        .map(ip -> new EndpointAddressBuilder().withIp(ip).build())
+                        .collect(Collectors.toList()))
+                .withPorts(ports.stream()
+                        .map(port -> new EndpointPortBuilder()
+                                .withPort(port.getPort())
+                                .withProtocol(port.getTransportProtocol().toString())
+                                .build())
+                        .collect(Collectors.toList()));
 
         return new io.fabric8.kubernetes.api.model.EndpointsBuilder()
                 .withMetadata(metadataBuilder().build())
-                .withSubsets(subset.build()).build();
+                .withSubsets(subset.build())
+                .build();
     }
 
     @Override

@@ -2,37 +2,9 @@ package cz.xtf.core.openshift;
 
 import static cz.xtf.core.config.OpenShiftConfig.routeDomain;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Base64;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Random;
-import java.util.ServiceLoader;
-import java.util.concurrent.TimeUnit;
-import java.util.function.BooleanSupplier;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
-
 import cz.xtf.core.config.WaitingConfig;
 import cz.xtf.core.event.EventList;
 import cz.xtf.core.openshift.crd.CustomResourceDefinitionContextProvider;
@@ -92,7 +64,32 @@ import io.fabric8.openshift.client.DefaultOpenShiftClient;
 import io.fabric8.openshift.client.OpenShiftConfig;
 import io.fabric8.openshift.client.OpenShiftConfigBuilder;
 import io.fabric8.openshift.client.ParameterValue;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Base64;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Random;
+import java.util.ServiceLoader;
+import java.util.concurrent.TimeUnit;
+import java.util.function.BooleanSupplier;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.EqualsBuilder;
 import rx.Observable;
 import rx.observables.StringObservable;
 
@@ -106,8 +103,8 @@ public class OpenShift extends DefaultOpenShiftClient {
     /**
      * Used to cache created Openshift clients for given test case.
      */
-    public static final Multimap<String, OpenShift> namespaceToOpenshiftClientMap = Multimaps
-            .synchronizedListMultimap(ArrayListMultimap.create());
+    public static final Multimap<String, OpenShift> namespaceToOpenshiftClientMap =
+            Multimaps.synchronizedListMultimap(ArrayListMultimap.create());
 
     /**
      * This label is supposed to be used for any resource created by the XTF to easily distinguish which resources have
@@ -115,6 +112,7 @@ public class OpenShift extends DefaultOpenShiftClient {
      * NOTE: at the moment only place where this is used is for labeling namespaces. Other usages may be added in the future.
      */
     public static final String XTF_MANAGED_LABEL = "xtf.cz/managed";
+
     private final AppsAPIGroupClient appsAPIGroupClient;
 
     /**
@@ -140,7 +138,8 @@ public class OpenShift extends DefaultOpenShiftClient {
     public static OpenShift get(Path kubeconfigPath, String namespace) {
         try {
             String kubeconfigContents = new String(Files.readAllBytes(kubeconfigPath), StandardCharsets.UTF_8);
-            Config kubeconfig = Config.fromKubeconfig(null, kubeconfigContents, kubeconfigPath.toAbsolutePath().toString());
+            Config kubeconfig = Config.fromKubeconfig(
+                    null, kubeconfigContents, kubeconfigPath.toAbsolutePath().toString());
             OpenShiftConfig openShiftConfig = new OpenShiftConfig(kubeconfig);
 
             setupTimeouts(openShiftConfig);
@@ -186,10 +185,10 @@ public class OpenShift extends DefaultOpenShiftClient {
         OpenShift openshift;
 
         // check whether such a client already exists
-        Optional<OpenShift> optionalOpenShift = namespaceToOpenshiftClientMap
-                .get(openShiftConfig.getNamespace()).stream()
-                .filter(oc -> isEqualOpenshiftConfig(openShiftConfig, oc.getConfiguration()))
-                .findFirst();
+        Optional<OpenShift> optionalOpenShift =
+                namespaceToOpenshiftClientMap.get(openShiftConfig.getNamespace()).stream()
+                        .filter(oc -> isEqualOpenshiftConfig(openShiftConfig, oc.getConfiguration()))
+                        .findFirst();
 
         if (optionalOpenShift.isPresent()) {
             return optionalOpenShift.get();
@@ -246,21 +245,25 @@ public class OpenShift extends DefaultOpenShiftClient {
                 .addToLabels(KEEP_LABEL, "true")
                 .endMetadata()
                 .withNewType("kubernetes.io/dockerconfigjson")
-                .withData(Collections.singletonMap(".dockerconfigjson", Base64.getEncoder().encodeToString(secret.getBytes())))
+                .withData(Collections.singletonMap(
+                        ".dockerconfigjson", Base64.getEncoder().encodeToString(secret.getBytes())))
                 .build();
         secrets().createOrReplace(pullSecret);
         serviceAccounts().withName("default").edit(new Visitor<ServiceAccountBuilder>() {
             @Override
             public void visit(ServiceAccountBuilder builder) {
-                builder.addToImagePullSecrets(
-                        new LocalObjectReferenceBuilder().withName(pullSecret.getMetadata().getName()).build());
+                builder.addToImagePullSecrets(new LocalObjectReferenceBuilder()
+                        .withName(pullSecret.getMetadata().getName())
+                        .build());
             }
         });
 
         serviceAccounts().withName("builder").edit(new Visitor<ServiceAccountBuilder>() {
             @Override
             public void visit(ServiceAccountBuilder builder) {
-                builder.addToSecrets(new ObjectReferenceBuilder().withName(pullSecret.getMetadata().getName()).build());
+                builder.addToSecrets(new ObjectReferenceBuilder()
+                        .withName(pullSecret.getMetadata().getName())
+                        .build());
             }
         });
     }
@@ -290,12 +293,19 @@ public class OpenShift extends DefaultOpenShiftClient {
 
     // Projects
     public ProjectRequest createProjectRequest() {
-        return createProjectRequest(
-                new ProjectRequestBuilder().withNewMetadata().withName(getNamespace()).endMetadata().build());
+        return createProjectRequest(new ProjectRequestBuilder()
+                .withNewMetadata()
+                .withName(getNamespace())
+                .endMetadata()
+                .build());
     }
 
     public ProjectRequest createProjectRequest(String name) {
-        return createProjectRequest(new ProjectRequestBuilder().withNewMetadata().withName(name).endMetadata().build());
+        return createProjectRequest(new ProjectRequestBuilder()
+                .withNewMetadata()
+                .withName(name)
+                .endMetadata()
+                .build());
     }
 
     public ProjectRequest createProjectRequest(ProjectRequest projectRequest) {
@@ -309,7 +319,11 @@ public class OpenShift extends DefaultOpenShiftClient {
      * @see OpenShift#recreateProject(String)
      */
     public ProjectRequest recreateProject() {
-        return recreateProject(new ProjectRequestBuilder().withNewMetadata().withName(getNamespace()).endMetadata().build());
+        return recreateProject(new ProjectRequestBuilder()
+                .withNewMetadata()
+                .withName(getNamespace())
+                .endMetadata()
+                .build());
     }
 
     /**
@@ -319,12 +333,16 @@ public class OpenShift extends DefaultOpenShiftClient {
      * @return ProjectRequest instance
      */
     public ProjectRequest recreateProject(String name) {
-        return recreateProject(new ProjectRequestBuilder().withNewMetadata().withName(name).endMetadata().build());
+        return recreateProject(new ProjectRequestBuilder()
+                .withNewMetadata()
+                .withName(name)
+                .endMetadata()
+                .build());
     }
 
     /**
      * Creates or recreates project specified by projectRequest instance.
-     * 
+     *
      * @param projectRequest project request instance
      * @return ProjectRequest instance
      */
@@ -332,8 +350,12 @@ public class OpenShift extends DefaultOpenShiftClient {
         boolean deleted = deleteProject(projectRequest.getMetadata().getName());
         if (deleted) {
             BooleanSupplier bs = () -> getProject(projectRequest.getMetadata().getName()) == null;
-            new SimpleWaiter(bs, TimeUnit.MILLISECONDS, WaitingConfig.timeout(),
-                    "Waiting for old project deletion before creating new one").waitFor();
+            new SimpleWaiter(
+                            bs,
+                            TimeUnit.MILLISECONDS,
+                            WaitingConfig.timeout(),
+                            "Waiting for old project deletion before creating new one")
+                    .waitFor();
         }
         return createProjectRequest(projectRequest);
     }
@@ -439,7 +461,9 @@ public class OpenShift extends DefaultOpenShiftClient {
 
     public String getPodLog(Pod pod, Container container) {
         if (Objects.nonNull(container)) {
-            return pods().withName(pod.getMetadata().getName()).inContainer(container.getName()).getLog();
+            return pods().withName(pod.getMetadata().getName())
+                    .inContainer(container.getName())
+                    .getLog();
         } else {
             return pods().withName(pod.getMetadata().getName()).getLog();
         }
@@ -465,7 +489,9 @@ public class OpenShift extends DefaultOpenShiftClient {
 
     public Reader getPodLogReader(Pod pod, Container container) {
         if (Objects.nonNull(container)) {
-            return pods().withName(pod.getMetadata().getName()).inContainer(container.getName()).getLogReader();
+            return pods().withName(pod.getMetadata().getName())
+                    .inContainer(container.getName())
+                    .getLogReader();
         } else {
             return pods().withName(pod.getMetadata().getName()).getLogReader();
         }
@@ -496,7 +522,9 @@ public class OpenShift extends DefaultOpenShiftClient {
     public Observable<String> observePodLog(Pod pod, Container container) {
         LogWatch watcher;
         if (Objects.nonNull(container)) {
-            watcher = pods().withName(pod.getMetadata().getName()).inContainer(container.getName()).watchLog();
+            watcher = pods().withName(pod.getMetadata().getName())
+                    .inContainer(container.getName())
+                    .watchLog();
         } else {
             watcher = pods().withName(pod.getMetadata().getName()).watchLog();
         }
@@ -560,7 +588,9 @@ public class OpenShift extends DefaultOpenShiftClient {
     }
 
     public boolean deletePod(Pod pod, long gracePeriod) {
-        return pods().withName(pod.getMetadata().getName()).withGracePeriod(gracePeriod).delete();
+        return pods().withName(pod.getMetadata().getName())
+                .withGracePeriod(gracePeriod)
+                .delete();
     }
 
     /**
@@ -603,8 +633,8 @@ public class OpenShift extends DefaultOpenShiftClient {
         return getAllContainers(pod).stream()
                 .filter(c -> c.getName().equals(containerName))
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException(
-                        "Cannot find container with name " + containerName + " in pod " + pod.getMetadata().getName()));
+                .orElseThrow(() -> new RuntimeException("Cannot find container with name " + containerName + " in pod "
+                        + pod.getMetadata().getName()));
     }
 
     private <R> Map<String, R> retrieveFromPodContainers(Pod pod, Function<Container, R> containerRetriever) {
@@ -715,7 +745,12 @@ public class OpenShift extends DefaultOpenShiftClient {
     private String retrieveRouteSuffix() {
         Route route = new Route();
         route.setMetadata(new ObjectMetaBuilder().withName("probing-route").build());
-        route.setSpec(new RouteSpecBuilder().withNewTo().withKind("Service").withName("imaginary-service").endTo().build());
+        route.setSpec(new RouteSpecBuilder()
+                .withNewTo()
+                .withKind("Service")
+                .withName("imaginary-service")
+                .endTo()
+                .build());
 
         route = createRoute(route);
         deleteRoute(route);
@@ -729,7 +764,10 @@ public class OpenShift extends DefaultOpenShiftClient {
     }
 
     private boolean deleteReplicationController(ReplicationController replicationController) {
-        return replicationControllers().withName(replicationController.getMetadata().getName()).cascading(false).delete();
+        return replicationControllers()
+                .withName(replicationController.getMetadata().getName())
+                .cascading(false)
+                .delete();
     }
 
     // DeploymentConfigs
@@ -753,13 +791,21 @@ public class OpenShift extends DefaultOpenShiftClient {
      */
     public Map<String, String> getDeploymentConfigEnvVars(String name) {
         Map<String, String> envVars = new HashMap<>();
-        getDeploymentConfig(name).getSpec().getTemplate().getSpec().getContainers().get(0).getEnv()
+        getDeploymentConfig(name)
+                .getSpec()
+                .getTemplate()
+                .getSpec()
+                .getContainers()
+                .get(0)
+                .getEnv()
                 .forEach(envVar -> envVars.put(envVar.getName(), envVar.getValue()));
         return envVars;
     }
 
     public DeploymentConfig updateDeploymentconfig(DeploymentConfig deploymentConfig) {
-        return deploymentConfigs().withName(deploymentConfig.getMetadata().getName()).replace(deploymentConfig);
+        return deploymentConfigs()
+                .withName(deploymentConfig.getMetadata().getName())
+                .replace(deploymentConfig);
     }
 
     /**
@@ -774,9 +820,18 @@ public class OpenShift extends DefaultOpenShiftClient {
         DeploymentConfig dc = getDeploymentConfig(name);
 
         List<EnvVar> vars = envVars.entrySet().stream()
-                .map(x -> new EnvVarBuilder().withName(x.getKey()).withValue(x.getValue()).build())
+                .map(x -> new EnvVarBuilder()
+                        .withName(x.getKey())
+                        .withValue(x.getValue())
+                        .build())
                 .collect(Collectors.toList());
-        dc.getSpec().getTemplate().getSpec().getContainers().get(0).getEnv().removeIf(x -> envVars.containsKey(x.getName()));
+        dc.getSpec()
+                .getTemplate()
+                .getSpec()
+                .getContainers()
+                .get(0)
+                .getEnv()
+                .removeIf(x -> envVars.containsKey(x.getName()));
         dc.getSpec().getTemplate().getSpec().getContainers().get(0).getEnv().addAll(vars);
 
         return updateDeploymentconfig(dc);
@@ -787,7 +842,10 @@ public class OpenShift extends DefaultOpenShiftClient {
     }
 
     public boolean deleteDeploymentConfig(DeploymentConfig deploymentConfig, boolean cascading) {
-        return deploymentConfigs().withName(deploymentConfig.getMetadata().getName()).cascading(cascading).delete();
+        return deploymentConfigs()
+                .withName(deploymentConfig.getMetadata().getName())
+                .cascading(cascading)
+                .delete();
     }
 
     /**
@@ -815,7 +873,8 @@ public class OpenShift extends DefaultOpenShiftClient {
     }
 
     public Build getLatestBuild(String buildConfigName) {
-        long lastVersion = buildConfigs().withName(buildConfigName).get().getStatus().getLastVersion();
+        long lastVersion =
+                buildConfigs().withName(buildConfigName).get().getStatus().getLastVersion();
         return getBuild(buildConfigName + "-" + lastVersion);
     }
 
@@ -836,7 +895,11 @@ public class OpenShift extends DefaultOpenShiftClient {
     }
 
     public Build startBuild(String buildConfigName) {
-        BuildRequest request = new BuildRequestBuilder().withNewMetadata().withName(buildConfigName).endMetadata().build();
+        BuildRequest request = new BuildRequestBuilder()
+                .withNewMetadata()
+                .withName(buildConfigName)
+                .endMetadata()
+                .build();
         return buildConfigs().withName(buildConfigName).instantiate(request);
     }
 
@@ -884,7 +947,10 @@ public class OpenShift extends DefaultOpenShiftClient {
         BuildConfig bc = getBuildConfig(name);
 
         List<EnvVar> vars = envVars.entrySet().stream()
-                .map(x -> new EnvVarBuilder().withName(x.getKey()).withValue(x.getValue()).build())
+                .map(x -> new EnvVarBuilder()
+                        .withName(x.getKey())
+                        .withValue(x.getValue())
+                        .build())
                 .collect(Collectors.toList());
         bc.getSpec().getStrategy().getSourceStrategy().getEnv().removeIf(x -> envVars.containsKey(x.getName()));
         bc.getSpec().getStrategy().getSourceStrategy().getEnv().addAll(vars);
@@ -965,9 +1031,15 @@ public class OpenShift extends DefaultOpenShiftClient {
      * @return List of role bindings that aren't considered default.
      */
     public List<RoleBinding> getUserRoleBindings() {
-        return rbac().roleBindings().withLabelNotIn(KEEP_LABEL, "", "true")
-                .withLabelNotIn("olm.owner.kind", "ClusterServiceVersion").list().getItems().stream()
-                .filter(rb -> !rb.getMetadata().getName()
+        return rbac()
+                .roleBindings()
+                .withLabelNotIn(KEEP_LABEL, "", "true")
+                .withLabelNotIn("olm.owner.kind", "ClusterServiceVersion")
+                .list()
+                .getItems()
+                .stream()
+                .filter(rb -> !rb.getMetadata()
+                        .getName()
                         .matches("admin|system:deployers|system:image-builders|system:image-pullers"))
                 .collect(Collectors.toList());
     }
@@ -994,7 +1066,8 @@ public class OpenShift extends DefaultOpenShiftClient {
         return addRoleToServiceAccount(roleName, null, serviceAccountName, namespace);
     }
 
-    public RoleBinding addRoleToServiceAccount(String roleName, String roleKind, String serviceAccountName, String namespace) {
+    public RoleBinding addRoleToServiceAccount(
+            String roleName, String roleKind, String serviceAccountName, String namespace) {
         RoleBinding roleBinding = getOrCreateRoleBinding(roleName, roleKind);
         addSubjectToRoleBinding(roleBinding, "ServiceAccount", serviceAccountName, namespace);
         return updateRoleBinding(roleBinding);
@@ -1037,8 +1110,13 @@ public class OpenShift extends DefaultOpenShiftClient {
                 }
             }
             roleBinding = new RoleBindingBuilder()
-                    .withNewMetadata().withName(name).endMetadata()
-                    .withNewRoleRef().withKind(kind).withName(name).endRoleRef()
+                    .withNewMetadata()
+                    .withName(name)
+                    .endMetadata()
+                    .withNewRoleRef()
+                    .withKind(kind)
+                    .withName(name)
+                    .endRoleRef()
                     .build();
             createRoleBinding(roleBinding);
         }
@@ -1046,22 +1124,26 @@ public class OpenShift extends DefaultOpenShiftClient {
     }
 
     public RoleBinding updateRoleBinding(RoleBinding roleBinding) {
-        return rbac().roleBindings().withName(roleBinding.getMetadata().getName()).replace(roleBinding);
+        return rbac().roleBindings()
+                .withName(roleBinding.getMetadata().getName())
+                .replace(roleBinding);
     }
 
     private void addSubjectToRoleBinding(RoleBinding roleBinding, String entityKind, String entityName) {
         addSubjectToRoleBinding(roleBinding, entityKind, entityName, null);
     }
 
-    private void addSubjectToRoleBinding(RoleBinding roleBinding, String entityKind, String entityName,
-            String entityNamespace) {
-        SubjectBuilder subjectBuilder = new SubjectBuilder().withKind(entityKind).withName(entityName);
+    private void addSubjectToRoleBinding(
+            RoleBinding roleBinding, String entityKind, String entityName, String entityNamespace) {
+        SubjectBuilder subjectBuilder =
+                new SubjectBuilder().withKind(entityKind).withName(entityName);
         if (entityNamespace != null) {
             subjectBuilder.withNamespace(entityNamespace);
         }
         Subject subject = subjectBuilder.build();
         if (roleBinding.getSubjects().stream()
-                .noneMatch(x -> x.getName().equals(subject.getName()) && x.getKind().equals(subject.getKind()))) {
+                .noneMatch(x ->
+                        x.getName().equals(subject.getName()) && x.getKind().equals(subject.getKind()))) {
             roleBinding.getSubjects().add(subject);
         }
     }
@@ -1074,7 +1156,9 @@ public class OpenShift extends DefaultOpenShiftClient {
         RoleBinding roleBinding = this.rbac().roleBindings().withName(roleName).get();
 
         if (roleBinding != null) {
-            roleBinding.getSubjects().removeIf(s -> s.getName().equals(entityName) && s.getKind().equals(entityKind));
+            roleBinding
+                    .getSubjects()
+                    .removeIf(s -> s.getName().equals(entityName) && s.getKind().equals(entityKind));
             return updateRoleBinding(roleBinding);
         }
         return null;
@@ -1204,8 +1288,10 @@ public class OpenShift extends DefaultOpenShiftClient {
     }
 
     private ParameterValue[] processParameters(Map<String, String> parameters) {
-        return parameters.entrySet().stream().map(entry -> new ParameterValue(entry.getKey(), entry.getValue()))
-                .collect(Collectors.toList()).toArray(new ParameterValue[parameters.size()]);
+        return parameters.entrySet().stream()
+                .map(entry -> new ParameterValue(entry.getKey(), entry.getValue()))
+                .collect(Collectors.toList())
+                .toArray(new ParameterValue[parameters.size()]);
     }
 
     // Nodes
@@ -1276,9 +1362,12 @@ public class OpenShift extends DefaultOpenShiftClient {
     public Waiter clean() {
         for (CustomResourceDefinitionContextProvider crdContextProvider : OpenShift.getCRDContextProviders()) {
             try {
-                customResources(crdContextProvider.getContext(), GenericKubernetesResource.class,
-                        GenericKubernetesResourceList.class)
-                                .inNamespace(getNamespace()).delete();
+                customResources(
+                                crdContextProvider.getContext(),
+                                GenericKubernetesResource.class,
+                                GenericKubernetesResourceList.class)
+                        .inNamespace(getNamespace())
+                        .delete();
                 log.debug("DELETE :: " + crdContextProvider.getContext().getName() + " instances");
             } catch (KubernetesClientException kce) {
                 log.debug(crdContextProvider.getContext().getName() + " might not be installed on the cluster.", kce);
@@ -1300,18 +1389,25 @@ public class OpenShift extends DefaultOpenShiftClient {
         routes().withLabelNotIn(KEEP_LABEL, "", "true").delete();
         pods().withLabelNotIn(KEEP_LABEL, "", "true").withGracePeriod(0).delete();
         persistentVolumeClaims().withLabelNotIn(KEEP_LABEL, "", "true").delete();
-        autoscaling().v1().horizontalPodAutoscalers().withLabelNotIn(KEEP_LABEL, "", "true").delete();
+        autoscaling()
+                .v1()
+                .horizontalPodAutoscalers()
+                .withLabelNotIn(KEEP_LABEL, "", "true")
+                .delete();
         getUserConfigMaps().forEach(this::deleteConfigMap);
         getUserSecrets().forEach(this::deleteSecret);
         getUserServiceAccounts().forEach((sa) -> {
             this.deleteServiceAccount(sa);
         });
         getUserRoleBindings().forEach(this::deleteRoleBinding);
-        rbac().roles().withLabelNotIn(KEEP_LABEL, "", "true").withLabelNotIn("olm.owner.kind", "ClusterServiceVersion")
+        rbac().roles()
+                .withLabelNotIn(KEEP_LABEL, "", "true")
+                .withLabelNotIn("olm.owner.kind", "ClusterServiceVersion")
                 .delete();
 
         for (HasMetadata hasMetadata : listRemovableResources()) {
-            log.warn("DELETE LEFTOVER :: " + hasMetadata.getKind() + "/" + hasMetadata.getMetadata().getName());
+            log.warn("DELETE LEFTOVER :: " + hasMetadata.getKind() + "/"
+                    + hasMetadata.getMetadata().getName());
             resource(hasMetadata).withGracePeriod(0).cascading(true).delete();
         }
 
@@ -1321,29 +1417,75 @@ public class OpenShift extends DefaultOpenShiftClient {
     List<HasMetadata> listRemovableResources() {
         // keep the order for deletion to prevent K8s creating resources again
         List<HasMetadata> removables = new ArrayList<>();
-        removables.addAll(templates().withLabelNotIn(OpenShift.KEEP_LABEL, "", "true").list().getItems());
-        removables.addAll(apps().deployments().withLabelNotIn(OpenShift.KEEP_LABEL, "", "true").list().getItems());
-        removables.addAll(apps().replicaSets().withLabelNotIn(OpenShift.KEEP_LABEL, "", "true").list().getItems());
-        removables.addAll(batch().jobs().withLabelNotIn(OpenShift.KEEP_LABEL, "", "true").list().getItems());
-        removables.addAll(deploymentConfigs().withLabelNotIn(OpenShift.KEEP_LABEL, "", "true").list().getItems());
-        removables.addAll(apps().statefulSets().withLabelNotIn(OpenShift.KEEP_LABEL, "", "true").list().getItems());
-        removables.addAll(replicationControllers().withLabelNotIn(OpenShift.KEEP_LABEL, "", "true").list().getItems());
-        removables.addAll(buildConfigs().withLabelNotIn(OpenShift.KEEP_LABEL, "", "true").list().getItems());
-        removables.addAll(imageStreams().withLabelNotIn(OpenShift.KEEP_LABEL, "", "true").list().getItems());
-        removables.addAll(endpoints().withLabelNotIn(OpenShift.KEEP_LABEL, "", "true").list().getItems());
-        removables.addAll(services().withLabelNotIn(OpenShift.KEEP_LABEL, "", "true").list().getItems());
-        removables.addAll(builds().withLabelNotIn(OpenShift.KEEP_LABEL, "", "true").list().getItems());
-        removables.addAll(routes().withLabelNotIn(OpenShift.KEEP_LABEL, "", "true").list().getItems());
-        removables.addAll(pods().withLabelNotIn(OpenShift.KEEP_LABEL, "", "true").list().getItems());
-        removables.addAll(persistentVolumeClaims().withLabelNotIn(OpenShift.KEEP_LABEL, "", "true").list().getItems());
-        removables.addAll(autoscaling().v1().horizontalPodAutoscalers().withLabelNotIn(OpenShift.KEEP_LABEL, "", "true").list()
+        removables.addAll(templates()
+                .withLabelNotIn(OpenShift.KEEP_LABEL, "", "true")
+                .list()
+                .getItems());
+        removables.addAll(apps().deployments()
+                .withLabelNotIn(OpenShift.KEEP_LABEL, "", "true")
+                .list()
+                .getItems());
+        removables.addAll(apps().replicaSets()
+                .withLabelNotIn(OpenShift.KEEP_LABEL, "", "true")
+                .list()
+                .getItems());
+        removables.addAll(batch().jobs()
+                .withLabelNotIn(OpenShift.KEEP_LABEL, "", "true")
+                .list()
+                .getItems());
+        removables.addAll(deploymentConfigs()
+                .withLabelNotIn(OpenShift.KEEP_LABEL, "", "true")
+                .list()
+                .getItems());
+        removables.addAll(apps().statefulSets()
+                .withLabelNotIn(OpenShift.KEEP_LABEL, "", "true")
+                .list()
+                .getItems());
+        removables.addAll(replicationControllers()
+                .withLabelNotIn(OpenShift.KEEP_LABEL, "", "true")
+                .list()
+                .getItems());
+        removables.addAll(buildConfigs()
+                .withLabelNotIn(OpenShift.KEEP_LABEL, "", "true")
+                .list()
+                .getItems());
+        removables.addAll(imageStreams()
+                .withLabelNotIn(OpenShift.KEEP_LABEL, "", "true")
+                .list()
+                .getItems());
+        removables.addAll(endpoints()
+                .withLabelNotIn(OpenShift.KEEP_LABEL, "", "true")
+                .list()
+                .getItems());
+        removables.addAll(services()
+                .withLabelNotIn(OpenShift.KEEP_LABEL, "", "true")
+                .list()
+                .getItems());
+        removables.addAll(
+                builds().withLabelNotIn(OpenShift.KEEP_LABEL, "", "true").list().getItems());
+        removables.addAll(
+                routes().withLabelNotIn(OpenShift.KEEP_LABEL, "", "true").list().getItems());
+        removables.addAll(
+                pods().withLabelNotIn(OpenShift.KEEP_LABEL, "", "true").list().getItems());
+        removables.addAll(persistentVolumeClaims()
+                .withLabelNotIn(OpenShift.KEEP_LABEL, "", "true")
+                .list()
+                .getItems());
+        removables.addAll(autoscaling()
+                .v1()
+                .horizontalPodAutoscalers()
+                .withLabelNotIn(OpenShift.KEEP_LABEL, "", "true")
+                .list()
                 .getItems());
         removables.addAll(getUserConfigMaps());
         removables.addAll(getUserSecrets());
         removables.addAll(getUserServiceAccounts());
         removables.addAll(getUserRoleBindings());
-        removables.addAll(rbac().roles().withLabelNotIn(KEEP_LABEL, "", "true")
-                .withLabelNotIn("olm.owner.kind", "ClusterServiceVersion").list().getItems());
+        removables.addAll(rbac().roles()
+                .withLabelNotIn(KEEP_LABEL, "", "true")
+                .withLabelNotIn("olm.owner.kind", "ClusterServiceVersion")
+                .list()
+                .getItems());
 
         return removables;
     }
@@ -1387,7 +1529,9 @@ public class OpenShift extends DefaultOpenShiftClient {
                 .append(newConfig.getNamespace(), existingConfig.getNamespace())
                 .append(newConfig.getUsername(), existingConfig.getUsername())
                 .append(newConfig.getPassword(), existingConfig.getPassword())
-                .append(newConfig.getRequestConfig().getOauthToken(), existingConfig.getRequestConfig().getOauthToken())
+                .append(
+                        newConfig.getRequestConfig().getOauthToken(),
+                        existingConfig.getRequestConfig().getOauthToken())
                 .append(newConfig.isTrustCerts(), existingConfig.isTrustCerts())
                 .isEquals();
     }

@@ -8,10 +8,8 @@ import java.nio.file.Path;
 import java.security.GeneralSecurityException;
 import java.util.Collection;
 import java.util.LinkedList;
-
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
-
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.StringUtils;
 import org.apache.http.HttpEntityEnclosingRequest;
@@ -103,9 +101,11 @@ public class Http {
 
     public Http trustAll() {
         try {
-            SSLContext sslContext = SSLContexts.custom().loadTrustMaterial(new TrustAllStrategy()).build();
-            sslsf = new SSLConnectionSocketFactory(sslContext, new String[] { "TLSv1", "TLSv1.2" }, null,
-                    new NoopHostnameVerifier());
+            SSLContext sslContext = SSLContexts.custom()
+                    .loadTrustMaterial(new TrustAllStrategy())
+                    .build();
+            sslsf = new SSLConnectionSocketFactory(
+                    sslContext, new String[] {"TLSv1", "TLSv1.2"}, null, new NoopHostnameVerifier());
         } catch (GeneralSecurityException e) {
             throw new RuntimeException("Can't create SSL connection factory trusting everything", e);
         }
@@ -119,8 +119,9 @@ public class Http {
     public Http trustStore(Path trustStorePath, String trustStorePassword, HostnameVerifier verifier) {
         try {
             SSLContext sslContext = SSLContexts.custom()
-                    .loadTrustMaterial(trustStorePath.toFile(), trustStorePassword.toCharArray()).build();
-            sslsf = new SSLConnectionSocketFactory(sslContext, new String[] { "TLSv1", "TLSv1.2" }, null, verifier);
+                    .loadTrustMaterial(trustStorePath.toFile(), trustStorePassword.toCharArray())
+                    .build();
+            sslsf = new SSLConnectionSocketFactory(sslContext, new String[] {"TLSv1", "TLSv1.2"}, null, verifier);
         } catch (IOException | GeneralSecurityException e) {
             throw new RuntimeException("Can't create SSL connection factory", e);
         }
@@ -146,7 +147,8 @@ public class Http {
 
     public Http data(String data, ContentType contentType) {
         if (!(request instanceof HttpEntityEnclosingRequest))
-            throw new IllegalStateException("Can't add data to " + request.getClass().getSimpleName());
+            throw new IllegalStateException(
+                    "Can't add data to " + request.getClass().getSimpleName());
 
         ((HttpEntityEnclosingRequest) request).setEntity(new StringEntity(data, contentType));
         return this;
@@ -183,9 +185,10 @@ public class Http {
         }
 
         if (preemptiveAuth && username != null && password != null) {
-            // https://issues.apache.org/jira/browse/CODEC-89 Using this instead of encodeBase64String, as some versions of apache-commons have chunking enabled by default
-            String credentials = StringUtils
-                    .newStringUtf8(Base64.encodeBase64((username + ":" + password).getBytes(StandardCharsets.UTF_8), false));
+            // https://issues.apache.org/jira/browse/CODEC-89 Using this instead of encodeBase64String, as some versions
+            // of apache-commons have chunking enabled by default
+            String credentials = StringUtils.newStringUtf8(
+                    Base64.encodeBase64((username + ":" + password).getBytes(StandardCharsets.UTF_8), false));
             request.setHeader("Authorization", String.format("Basic %s", credentials));
         }
 

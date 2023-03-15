@@ -1,5 +1,9 @@
 package cz.xtf.core.openshift;
 
+import cz.xtf.core.config.OpenShiftConfig;
+import cz.xtf.core.http.Https;
+import cz.xtf.core.namespace.NamespaceManager;
+import io.fabric8.kubernetes.client.Config;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -11,18 +15,11 @@ import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
 import javax.net.ssl.HttpsURLConnection;
-
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
-
-import cz.xtf.core.config.OpenShiftConfig;
-import cz.xtf.core.http.Https;
-import cz.xtf.core.namespace.NamespaceManager;
-import io.fabric8.kubernetes.client.Config;
-import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class OpenShifts {
@@ -39,8 +36,8 @@ public class OpenShifts {
         }
 
         if (StringUtils.isNotEmpty(OpenShiftConfig.adminUsername())) {
-            return OpenShift.get(OpenShiftConfig.url(), namespace, OpenShiftConfig.adminUsername(),
-                    OpenShiftConfig.adminPassword());
+            return OpenShift.get(
+                    OpenShiftConfig.url(), namespace, OpenShiftConfig.adminUsername(), OpenShiftConfig.adminPassword());
         }
 
         if (StringUtils.isNotEmpty(OpenShiftConfig.adminKubeconfig())) {
@@ -53,7 +50,6 @@ public class OpenShifts {
     public static OpenShift master() {
 
         return OpenShifts.master(NamespaceManager.getNamespace());
-
     }
 
     public static OpenShift master(String namespace) {
@@ -62,7 +58,10 @@ public class OpenShifts {
         }
 
         if (StringUtils.isNotEmpty(OpenShiftConfig.masterUsername())) {
-            return OpenShift.get(OpenShiftConfig.url(), namespace, OpenShiftConfig.masterUsername(),
+            return OpenShift.get(
+                    OpenShiftConfig.url(),
+                    namespace,
+                    OpenShiftConfig.masterUsername(),
                     OpenShiftConfig.masterPassword());
         }
 
@@ -74,7 +73,9 @@ public class OpenShifts {
     }
 
     public static String getBinaryPath() {
-        return OpenShiftBinaryManagerFactory.INSTANCE.getOpenShiftBinaryManager().getBinaryPath();
+        return OpenShiftBinaryManagerFactory.INSTANCE
+                .getOpenShiftBinaryManager()
+                .getBinaryPath();
     }
 
     public static OpenShiftBinary masterBinary() {
@@ -82,7 +83,9 @@ public class OpenShifts {
     }
 
     public static OpenShiftBinary masterBinary(String namespace) {
-        return OpenShiftBinaryManagerFactory.INSTANCE.getOpenShiftBinaryManager().masterBinary(namespace);
+        return OpenShiftBinaryManagerFactory.INSTANCE
+                .getOpenShiftBinaryManager()
+                .masterBinary(namespace);
     }
 
     public static OpenShiftBinary adminBinary() {
@@ -90,7 +93,9 @@ public class OpenShifts {
     }
 
     public static OpenShiftBinary adminBinary(String namespace) {
-        return OpenShiftBinaryManagerFactory.INSTANCE.getOpenShiftBinaryManager().adminBinary(namespace);
+        return OpenShiftBinaryManagerFactory.INSTANCE
+                .getOpenShiftBinaryManager()
+                .adminBinary(namespace);
     }
 
     private static String getHomeDir() {
@@ -164,12 +169,18 @@ public class OpenShifts {
     }
 
     public static String getMasterToken() {
-        return getToken(OpenShiftConfig.masterToken(), OpenShiftConfig.masterUsername(), OpenShiftConfig.masterPassword(),
+        return getToken(
+                OpenShiftConfig.masterToken(),
+                OpenShiftConfig.masterUsername(),
+                OpenShiftConfig.masterPassword(),
                 OpenShiftConfig.masterKubeconfig());
     }
 
     public static String getAdminToken() {
-        return getToken(OpenShiftConfig.adminToken(), OpenShiftConfig.adminUsername(), OpenShiftConfig.adminPassword(),
+        return getToken(
+                OpenShiftConfig.adminToken(),
+                OpenShiftConfig.adminUsername(),
+                OpenShiftConfig.adminPassword(),
                 OpenShiftConfig.adminKubeconfig());
     }
 
@@ -183,12 +194,11 @@ public class OpenShifts {
             HttpsURLConnection connection = null;
             try {
                 if (getVersion() != null && getVersion().startsWith("3")) {
-                    connection = Https.getHttpsConnection(new URL(
-                            OpenShiftConfig.url()
-                                    + "/oauth/authorize?response_type=token&client_id=openshift-challenging-client"));
+                    connection = Https.getHttpsConnection(new URL(OpenShiftConfig.url()
+                            + "/oauth/authorize?response_type=token&client_id=openshift-challenging-client"));
                 } else {
-                    connection = Https.getHttpsConnection(new URL("https://oauth-openshift.apps." +
-                            StringUtils.substringBetween(OpenShiftConfig.url(), "api.", ":")
+                    connection = Https.getHttpsConnection(new URL("https://oauth-openshift.apps."
+                            + StringUtils.substringBetween(OpenShiftConfig.url(), "api.", ":")
                             + "/oauth/authorize?response_type=token&client_id=openshift-challenging-client"));
                 }
                 String encoded = Base64.getEncoder()
@@ -202,22 +212,27 @@ public class OpenShifts {
 
                 List<String> location = headers.get("Location");
                 if (location != null) {
-                    Optional<String> acces_token = location.stream().filter(s -> s.contains("access_token")).findFirst();
-                    return acces_token.map(s -> StringUtils.substringBetween(s, "#access_token=", "&")).orElse(null);
+                    Optional<String> acces_token = location.stream()
+                            .filter(s -> s.contains("access_token"))
+                            .findFirst();
+                    return acces_token
+                            .map(s -> StringUtils.substringBetween(s, "#access_token=", "&"))
+                            .orElse(null);
                 }
             } catch (IOException ex) {
                 log.error("Unable to retrieve token from Location header: {} ", ex.getMessage());
             } finally {
-                if (connection != null)
-                    connection.disconnect();
+                if (connection != null) connection.disconnect();
             }
             return null;
         }
 
         if (StringUtils.isNotEmpty(kubeconfig)) {
             try {
-                Config config = Config.fromKubeconfig(null,
-                        new String(Files.readAllBytes(Paths.get(kubeconfig)), StandardCharsets.UTF_8), kubeconfig);
+                Config config = Config.fromKubeconfig(
+                        null,
+                        new String(Files.readAllBytes(Paths.get(kubeconfig)), StandardCharsets.UTF_8),
+                        kubeconfig);
                 return config.getOauthToken();
             } catch (IOException e) {
                 log.error("Unable to retrieve token from kubeconfig: {} ", kubeconfig, e);
@@ -227,7 +242,8 @@ public class OpenShifts {
 
         File defaultKubeConfig = Paths.get(getHomeDir(), ".kube", "config").toFile();
         try {
-            Config config = Config.fromKubeconfig(null,
+            Config config = Config.fromKubeconfig(
+                    null,
                     new String(Files.readAllBytes(defaultKubeConfig.toPath()), StandardCharsets.UTF_8),
                     defaultKubeConfig.getAbsolutePath());
             return config.getOauthToken();

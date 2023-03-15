@@ -16,8 +16,6 @@ public class HostPathVolume extends Volume {
 
     @Override
     protected void addVolumeParameters(VolumeBuilder builder) {
-        builder.withNewHostPath()
-                .withPath(getSourceHostDirPath())
-                .endHostPath();
+        builder.withNewHostPath().withPath(getSourceHostDirPath()).endHostPath();
     }
 }

@@ -1,20 +1,5 @@
 package cz.xtf.junit5.listeners;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Stream;
-
-import org.junit.jupiter.api.Disabled;
-import org.junit.platform.engine.TestSource;
-import org.junit.platform.engine.support.descriptor.ClassSource;
-import org.junit.platform.launcher.TestExecutionListener;
-import org.junit.platform.launcher.TestIdentifier;
-import org.junit.platform.launcher.TestPlan;
-
 import cz.xtf.core.bm.BuildManager;
 import cz.xtf.core.bm.BuildManagers;
 import cz.xtf.core.bm.ManagedBuild;
@@ -33,7 +18,20 @@ import cz.xtf.junit5.extensions.SinceVersionCondition;
 import cz.xtf.junit5.extensions.SkipForCondition;
 import cz.xtf.junit5.interfaces.BuildDefinition;
 import io.fabric8.kubernetes.client.KubernetesClientException;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.Disabled;
+import org.junit.platform.engine.TestSource;
+import org.junit.platform.engine.support.descriptor.ClassSource;
+import org.junit.platform.launcher.TestExecutionListener;
+import org.junit.platform.launcher.TestIdentifier;
+import org.junit.platform.launcher.TestPlan;
 
 @Slf4j
 public class ManagedBuildPrebuilder implements TestExecutionListener {
@@ -58,14 +56,17 @@ public class ManagedBuildPrebuilder implements TestExecutionListener {
         // so we try to be nice and wait until there are available capacity in the build manager namespace.
         final OpenShift buildManagerOpenShift = OpenShifts.master(BuildManagerConfig.namespace());
         Waiter runningBuildsBelowCapacity = new SimpleWaiter(() -> buildManagerOpenShift.getBuilds().stream()
-                .filter(build -> build.getStatus() != null && "Running".equals(build.getStatus().getPhase()))
-                .count() < BuildManagerConfig.maxRunningBuilds())
-                        .timeout(TimeUnit.MILLISECONDS, WaitingConfig.timeout())
-                        .reason("Waiting for a free capacity for running builds in " + BuildManagerConfig.namespace()
-                                + " namespace.");
+                                .filter(build -> build.getStatus() != null
+                                        && "Running".equals(build.getStatus().getPhase()))
+                                .count()
+                        < BuildManagerConfig.maxRunningBuilds())
+                .timeout(TimeUnit.MILLISECONDS, WaitingConfig.timeout())
+                .reason("Waiting for a free capacity for running builds in " + BuildManagerConfig.namespace()
+                        + " namespace.");
 
         for (final BuildDefinition buildDefinition : buildsToBeBuilt) {
-            // lazy creation, so that we don't attempt to create a buildmanager namespace when no builds defined (e.g. OSO tests)
+            // lazy creation, so that we don't attempt to create a buildmanager namespace when no builds defined (e.g.
+            // OSO tests)
             if (buildManager == null) {
                 buildManager = BuildManagers.get();
             }
@@ -75,7 +76,9 @@ public class ManagedBuildPrebuilder implements TestExecutionListener {
             } catch (WaiterException x) {
                 log.warn("Timeout waiting for free capacity", x);
             } catch (KubernetesClientException x) {
-                log.warn("KubernetesClientException waiting for free capacity in {} namespace", BuildManagerConfig.namespace(),
+                log.warn(
+                        "KubernetesClientException waiting for free capacity in {} namespace",
+                        BuildManagerConfig.namespace(),
                         x);
             }
 
@@ -106,7 +109,8 @@ public class ManagedBuildPrebuilder implements TestExecutionListener {
                     deferredWaits.add(waitForBuild);
                 }
             } catch (KubernetesClientException x) {
-                // if the build failed, we need to treat the managed build as broken, better to delete it (so that the test itself can try again)
+                // if the build failed, we need to treat the managed build as broken, better to delete it (so that the
+                // test itself can try again)
                 log.error("Error building {}", buildDefinition, x);
 
                 try {
@@ -125,15 +129,16 @@ public class ManagedBuildPrebuilder implements TestExecutionListener {
         }
     }
 
-    private void addBuildDefinition(List<BuildDefinition> buildsToBeBuilt, Set<BuildDefinition> buildsSeen,
-            BuildDefinition buildDefinition) {
+    private void addBuildDefinition(
+            List<BuildDefinition> buildsToBeBuilt, Set<BuildDefinition> buildsSeen, BuildDefinition buildDefinition) {
         if (!buildsSeen.contains(buildDefinition)) {
             buildsSeen.add(buildDefinition);
             buildsToBeBuilt.add(buildDefinition);
         }
     }
 
-    private void process(List<BuildDefinition> buildsToBeBuilt, Set<BuildDefinition> buildsSeen, TestIdentifier identifier) {
+    private void process(
+            List<BuildDefinition> buildsToBeBuilt, Set<BuildDefinition> buildsSeen, TestIdentifier identifier) {
         if (identifier.getSource().isPresent()) {
             TestSource testSource = identifier.getSource().get();
             if (testSource instanceof ClassSource) {
@@ -147,10 +152,12 @@ public class ManagedBuildPrebuilder implements TestExecutionListener {
                     return;
                 }
 
-                Arrays.stream(klass.getAnnotations()).filter(a -> a.annotationType().getAnnotation(UsesBuild.class) != null)
+                Arrays.stream(klass.getAnnotations())
+                        .filter(a -> a.annotationType().getAnnotation(UsesBuild.class) != null)
                         .forEach(a -> {
                             try {
-                                Object result = a.annotationType().getMethod("value").invoke(a);
+                                Object result =
+                                        a.annotationType().getMethod("value").invoke(a);
                                 if (result instanceof BuildDefinition) {
                                     addBuildDefinition(buildsToBeBuilt, buildsSeen, (BuildDefinition) result);
                                 } else if (result instanceof BuildDefinition[]) {
@@ -159,10 +166,14 @@ public class ManagedBuildPrebuilder implements TestExecutionListener {
                                 } else {
                                     log.error(
                                             "Value present in {} is not instance of {}, not able to get ManagedBuild to be built",
-                                            result, BuildDefinition.class);
+                                            result,
+                                            BuildDefinition.class);
                                 }
                             } catch (Exception e) {
-                                log.error("Failed to invoke value() on annotation " + a.annotationType().getName(), e);
+                                log.error(
+                                        "Failed to invoke value() on annotation "
+                                                + a.annotationType().getName(),
+                                        e);
                             }
                         });
             }
@@ -170,7 +181,9 @@ public class ManagedBuildPrebuilder implements TestExecutionListener {
     }
 
     static boolean shouldSkipBuildsForClass(Class<?> klass) {
-        boolean classDisabled = Arrays.stream(klass.getAnnotationsByType(Disabled.class)).findAny().isPresent();
+        boolean classDisabled = Arrays.stream(klass.getAnnotationsByType(Disabled.class))
+                .findAny()
+                .isPresent();
         boolean classSkippedForStream = Arrays.stream(klass.getAnnotationsByType(SkipFor.class))
                 .anyMatch(a -> SkipForCondition.resolve(a).isDisabled());
         boolean classSkippedForTestedVersion = Arrays.stream(klass.getAnnotationsByType(SinceVersion.class))

@@ -1,5 +1,9 @@
 package cz.xtf.core.helm;
 
+import cz.xtf.core.config.HelmConfig;
+import cz.xtf.core.http.Https;
+import cz.xtf.core.openshift.ClusterVersionInfo;
+import cz.xtf.core.openshift.ClusterVersionInfoFactory;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -9,20 +13,15 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.SystemUtils;
-
-import cz.xtf.core.config.HelmConfig;
-import cz.xtf.core.http.Https;
-import cz.xtf.core.openshift.ClusterVersionInfo;
-import cz.xtf.core.openshift.ClusterVersionInfoFactory;
-import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 class ConfiguredVersionHelmBinaryPathResolver implements HelmBinaryPathResolver {
 
-    private static final String OCP_4_HELM_BINARY_DOWNLOAD_URL = "https://mirror.openshift.com/pub/openshift-v4/clients/helm";
+    private static final String OCP_4_HELM_BINARY_DOWNLOAD_URL =
+            "https://mirror.openshift.com/pub/openshift-v4/clients/helm";
 
     @Override
     public String resolve() {
@@ -44,8 +43,11 @@ class ConfiguredVersionHelmBinaryPathResolver implements HelmBinaryPathResolver 
         Objects.requireNonNull(archivePath);
 
         try {
-            List<String> args = Stream
-                    .of("tar", "-xf", archivePath.toAbsolutePath().toString(), "-C",
+            List<String> args = Stream.of(
+                            "tar",
+                            "-xf",
+                            archivePath.toAbsolutePath().toString(),
+                            "-C",
                             getProjectHelmDir().toAbsolutePath().toString())
                     .collect(Collectors.toList());
             ProcessBuilder pb = new ProcessBuilder(args);
@@ -84,7 +86,9 @@ class ConfiguredVersionHelmBinaryPathResolver implements HelmBinaryPathResolver 
     private Path getCachedOrDownloadClientArchive(final String url, final String version, final boolean cacheEnabled) {
         Objects.requireNonNull(url);
 
-        log.debug("Trying to load Helm client archive from cache (enabled: {}) or download it from {}.", cacheEnabled,
+        log.debug(
+                "Trying to load Helm client archive from cache (enabled: {}) or download it from {}.",
+                cacheEnabled,
                 url);
         Path archivePath;
         if (cacheEnabled) {
@@ -114,8 +118,8 @@ class ConfiguredVersionHelmBinaryPathResolver implements HelmBinaryPathResolver 
         if (SystemUtils.IS_OS_MAC) {
             systemType = "darwin";
         }
-        return String.format("%s/%s/helm-%s-amd64.tar.gz", OCP_4_HELM_BINARY_DOWNLOAD_URL, helmClientVersion,
-                systemType);
+        return String.format(
+                "%s/%s/helm-%s-amd64.tar.gz", OCP_4_HELM_BINARY_DOWNLOAD_URL, helmClientVersion, systemType);
     }
 
     private Path getProjectHelmDir() {

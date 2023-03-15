@@ -1,16 +1,5 @@
 package cz.xtf.builder.builders;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import org.apache.commons.lang3.StringUtils;
-
 import cz.xtf.builder.builders.pod.ConfigMapVolume;
 import cz.xtf.builder.builders.pod.ContainerBuilder;
 import cz.xtf.builder.builders.pod.EmptyDirVolume;
@@ -21,6 +10,15 @@ import cz.xtf.builder.builders.pod.SecretVolume;
 import cz.xtf.builder.builders.pod.Volume;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodSpecBuilder;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+import org.apache.commons.lang3.StringUtils;
 
 public class PodBuilder extends AbstractBuilder<Pod, PodBuilder> {
     private final DeploymentConfigBuilder deploymentBuilder;
@@ -118,7 +116,8 @@ public class PodBuilder extends AbstractBuilder<Pod, PodBuilder> {
     public Pod build() {
         PodSpecBuilder specBuilder = new PodSpecBuilder();
 
-        specBuilder.withContainers(containerBuilders.stream().map(ContainerBuilder::build).collect(Collectors.toList()));
+        specBuilder.withContainers(
+                containerBuilders.stream().map(ContainerBuilder::build).collect(Collectors.toList()));
         specBuilder.withDnsPolicy("ClusterFirst");
 
         if (!nodeSelectorLabels.isEmpty()) {
@@ -138,9 +137,7 @@ public class PodBuilder extends AbstractBuilder<Pod, PodBuilder> {
         specBuilder.withVolumes(volumes.stream().map(Volume::build).collect(Collectors.toList()));
 
         if (runAsUser != null) {
-            specBuilder.withNewSecurityContext()
-                    .withRunAsUser(runAsUser)
-                    .endSecurityContext();
+            specBuilder.withNewSecurityContext().withRunAsUser(runAsUser).endSecurityContext();
         }
 
         return new io.fabric8.kubernetes.api.model.PodBuilder()
@@ -163,7 +160,9 @@ public class PodBuilder extends AbstractBuilder<Pod, PodBuilder> {
 
     private ContainerBuilder getContainerBuilder(String name) {
         ContainerBuilder result;
-        Optional<ContainerBuilder> opt = containerBuilders.stream().filter(bldr -> bldr.getName().equals(name)).findFirst();
+        Optional<ContainerBuilder> opt = containerBuilders.stream()
+                .filter(bldr -> bldr.getName().equals(name))
+                .findFirst();
         if (opt.isPresent()) {
             result = opt.get();
         } else {

@@ -1,10 +1,9 @@
 package cz.xtf.junit5.config;
 
+import cz.xtf.core.config.XTFConfig;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-
-import cz.xtf.core.config.XTFConfig;
 
 public class JUnitConfig {
     private static final String CLEAN_OPENSHIFT = "xtf.junit.clean_openshift";
@@ -23,12 +22,14 @@ public class JUnitConfig {
 
     public static boolean recordAlways() {
         return XTFConfig.get(RECORD_ALWAYS) != null
-                && (XTFConfig.get(RECORD_ALWAYS).equals("") || XTFConfig.get(RECORD_ALWAYS).toLowerCase().equals("true"));
+                && (XTFConfig.get(RECORD_ALWAYS).equals("")
+                        || XTFConfig.get(RECORD_ALWAYS).toLowerCase().equals("true"));
     }
 
     public static boolean recordBefore() {
         return XTFConfig.get(RECORD_BEFORE) != null
-                && (XTFConfig.get(RECORD_BEFORE).equals("") || XTFConfig.get(RECORD_BEFORE).toLowerCase().equals("true"));
+                && (XTFConfig.get(RECORD_BEFORE).equals("")
+                        || XTFConfig.get(RECORD_BEFORE).toLowerCase().equals("true"));
     }
 
     public static boolean cleanOpenShift() {

@@ -25,7 +25,8 @@ public class SystemPropertyBasedServiceLogsConfigurations {
     private static final String CONFIGURATION_PROPERTY_ATTRIBUTE_SEPARATOR = ";";
     private static final String CONFIGURATION_PROPERTY_NAME_VALUE_SEPARATOR = "=";
     // attribute names regex
-    private static final String ALLOWED_ATTRIBUTE_NAME_REGEX = String.format("%s|%s|%s",
+    private static final String ALLOWED_ATTRIBUTE_NAME_REGEX = String.format(
+            "%s|%s|%s",
             ServiceLogsSettings.ATTRIBUTE_NAME_TARGET,
             ServiceLogsSettings.ATTRIBUTE_NAME_FILTER,
             ServiceLogsSettings.ATTRIBUTE_NAME_OUTPUT);
@@ -57,25 +58,26 @@ public class SystemPropertyBasedServiceLogsConfigurations {
     private Map<String, ServiceLogsSettings> loadConfigurations() {
         return Stream.of(serviceLogsStreamingConfigProperty.split(CONFIGURATION_PROPERTY_ITEMS_SEPARATOR))
                 .map(configurationItem -> getSettingsFromItemConfiguration(configurationItem))
-                .collect(Collectors.toMap(serviceLogsSettings -> serviceLogsSettings.getTarget(),
+                .collect(Collectors.toMap(
+                        serviceLogsSettings -> serviceLogsSettings.getTarget(),
                         serviceLogsSettings -> serviceLogsSettings));
     }
 
     private static ServiceLogsSettings getSettingsFromItemConfiguration(String configurationItem) {
         // validate the item config
         if (!configurationItem.matches(ALLOWED_ITEM_REGEX)) {
-            throw new IllegalArgumentException(
-                    String.format(
-                            "The value of the \"xtf.log.streaming.config\" property items must match the following format: %s. Was: %s"
-                                    + ALLOWED_ITEM_REGEX,
-                            configurationItem));
+            throw new IllegalArgumentException(String.format(
+                    "The value of the \"xtf.log.streaming.config\" property items must match the following format: %s. Was: %s"
+                            + ALLOWED_ITEM_REGEX,
+                    configurationItem));
         }
         // get all attributes for an item
         final String[] configurationAttributes = configurationItem.split(CONFIGURATION_PROPERTY_ATTRIBUTE_SEPARATOR);
         // prepare a builder for this item configuration
         final ServiceLogsSettings.Builder builder = new ServiceLogsSettings.Builder();
 
-        Arrays.stream(configurationAttributes).map(a -> a.split(CONFIGURATION_PROPERTY_NAME_VALUE_SEPARATOR))
+        Arrays.stream(configurationAttributes)
+                .map(a -> a.split(CONFIGURATION_PROPERTY_NAME_VALUE_SEPARATOR))
                 .forEach(nameValuePair -> {
                     final String attributeName = nameValuePair[0];
                     final String attributeValue = nameValuePair[1];
@@ -84,8 +86,8 @@ public class SystemPropertyBasedServiceLogsConfigurations {
         return builder.build();
     }
 
-    private static ServiceLogsSettings.Builder toBuilder(ServiceLogsSettings.Builder theBuilder, String attributeName,
-            String attributeValue) {
+    private static ServiceLogsSettings.Builder toBuilder(
+            ServiceLogsSettings.Builder theBuilder, String attributeName, String attributeValue) {
         switch (attributeName) {
             case ServiceLogsSettings.ATTRIBUTE_NAME_TARGET:
                 theBuilder.withTarget(attributeValue);
@@ -97,10 +99,9 @@ public class SystemPropertyBasedServiceLogsConfigurations {
                 theBuilder.withOutputPath(attributeValue);
                 break;
             default:
-                throw new IllegalArgumentException(
-                        String.format(
-                                "Unconventional configuration attribute name: %s. Allowed configuration attributes names: (%s)",
-                                attributeName, ALLOWED_ATTRIBUTE_NAME_REGEX));
+                throw new IllegalArgumentException(String.format(
+                        "Unconventional configuration attribute name: %s. Allowed configuration attributes names: (%s)",
+                        attributeName, ALLOWED_ATTRIBUTE_NAME_REGEX));
         }
         return theBuilder;
     }
@@ -111,14 +112,17 @@ public class SystemPropertyBasedServiceLogsConfigurations {
     }
 
     public ServiceLogsSettings forClass(Class<?> testClazz) {
-        Optional<Map.Entry<String, ServiceLogsSettings>> selectedConfigurationSearch = configurations.entrySet().stream()
-                .filter(c -> testClazz.getName().equals(c.getKey()))
-                .findFirst();
+        Optional<Map.Entry<String, ServiceLogsSettings>> selectedConfigurationSearch =
+                configurations.entrySet().stream()
+                        .filter(c -> testClazz.getName().equals(c.getKey()))
+                        .findFirst();
         if (!selectedConfigurationSearch.isPresent()) {
             selectedConfigurationSearch = configurations.entrySet().stream()
                     .filter(c -> testClazz.getName().matches(c.getKey()))
                     .findFirst();
         }
-        return selectedConfigurationSearch.isPresent() ? selectedConfigurationSearch.get().getValue() : null;
+        return selectedConfigurationSearch.isPresent()
+                ? selectedConfigurationSearch.get().getValue()
+                : null;
     }
 }

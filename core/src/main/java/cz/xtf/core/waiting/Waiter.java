@@ -1,13 +1,11 @@
 package cz.xtf.core.waiting;
 
-import java.util.concurrent.TimeUnit;
-
-import org.apache.commons.lang3.time.DurationFormatUtils;
-import org.slf4j.event.Level;
-
 import cz.xtf.core.config.WaitingConfig;
 import cz.xtf.core.waiting.failfast.FailFastCheck;
+import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.time.DurationFormatUtils;
+import org.slf4j.event.Level;
 
 /**
  * An object that waits on condition to be met.
@@ -170,8 +168,11 @@ public interface Waiter {
          */
         public void logStart(String reason, long millis, Level level) {
             if (this.equals(START) || this.equals(BOTH))
-                logMessage(level, String.format("Waiting up to %s. Reason: %s",
-                        DurationFormatUtils.formatDurationWords(millis, true, true), reason));
+                logMessage(
+                        level,
+                        String.format(
+                                "Waiting up to %s. Reason: %s",
+                                DurationFormatUtils.formatDurationWords(millis, true, true), reason));
         }
 
         /**
@@ -194,8 +195,11 @@ public interface Waiter {
          */
         public void logEnd(String reason, long millis, Level level) {
             if (this.equals(END) || this.equals(BOTH))
-                logMessage(level, String.format("Finished waiting after %s. Reason: %s",
-                        DurationFormatUtils.formatDurationWords(millis, true, true), reason));
+                logMessage(
+                        level,
+                        String.format(
+                                "Finished waiting after %s. Reason: %s",
+                                DurationFormatUtils.formatDurationWords(millis, true, true), reason));
         }
 
         private void logMessage(Level level, String message) {

@@ -32,9 +32,19 @@ public enum ServiceLogColor {
     private static int idx = 0;
 
     public static final ServiceLogColor[] COLORS = {
-            ANSI_BRIGHT_GREEN, ANSI_BRIGHT_RED, ANSI_BRIGHT_YELLOW,
-            ANSI_BRIGHT_BLUE, ANSI_BRIGHT_PURPLE, ANSI_BRIGHT_CYAN, ANSI_BRIGHT_WHITE,
-            ANSI_RED1, ANSI_GREEN1, ANSI_YELLOW1, ANSI_AZURE1, ANSI_VIOLET1, ANSI_WATER1
+        ANSI_BRIGHT_GREEN,
+        ANSI_BRIGHT_RED,
+        ANSI_BRIGHT_YELLOW,
+        ANSI_BRIGHT_BLUE,
+        ANSI_BRIGHT_PURPLE,
+        ANSI_BRIGHT_CYAN,
+        ANSI_BRIGHT_WHITE,
+        ANSI_RED1,
+        ANSI_GREEN1,
+        ANSI_YELLOW1,
+        ANSI_AZURE1,
+        ANSI_VIOLET1,
+        ANSI_WATER1
     };
 
     private ServiceLogColor(String value) {

@@ -1,15 +1,14 @@
 package cz.xtf.builder.builders;
 
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-
 import io.fabric8.kubernetes.api.model.ObjectReferenceBuilder;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.openshift.api.model.DeploymentConfig;
 import io.fabric8.openshift.api.model.DeploymentConfigSpecBuilder;
 import io.fabric8.openshift.api.model.DeploymentTriggerPolicy;
 import io.fabric8.openshift.api.model.DeploymentTriggerPolicyBuilder;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 
 public class DeploymentConfigBuilder extends AbstractBuilder<DeploymentConfig, DeploymentConfigBuilder> {
     public static final String SYNCHRONOUS_LABEL = "synchronousId";
@@ -92,9 +91,7 @@ public class DeploymentConfigBuilder extends AbstractBuilder<DeploymentConfig, D
                     .build());
         }
         if (manualTrigger) {
-            triggers.add(new DeploymentTriggerPolicyBuilder()
-                    .withType("Manual")
-                    .build());
+            triggers.add(new DeploymentTriggerPolicyBuilder().withType("Manual").build());
         }
         if (synchronousDeployment >= 0) {
             final String synchronousId = Integer.toString(synchronousDeployment);
@@ -107,7 +104,9 @@ public class DeploymentConfigBuilder extends AbstractBuilder<DeploymentConfig, D
                 .withTriggers(triggers)
                 .withReplicas(replicas)
                 .withSelector(Collections.singletonMap("name", podBuilder.getName()))
-                .withNewStrategy().withType(strategy).endStrategy()
+                .withNewStrategy()
+                .withType(strategy)
+                .endStrategy()
                 .withNewTemplate()
                 .withMetadata(pod.getMetadata())
                 .withSpec(pod.getSpec())

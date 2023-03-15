@@ -1,5 +1,12 @@
 package cz.xtf.testhelpers.image;
 
+import cz.xtf.core.config.WaitingConfig;
+import cz.xtf.core.config.XTFConfig;
+import cz.xtf.core.openshift.OpenShift;
+import cz.xtf.core.openshift.PodShell;
+import cz.xtf.core.openshift.helpers.ResourceParsers;
+import cz.xtf.core.waiting.SimpleWaiter;
+import io.fabric8.kubernetes.api.model.*;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -8,14 +15,6 @@ import java.util.Map;
 import java.util.function.BooleanSupplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import cz.xtf.core.config.WaitingConfig;
-import cz.xtf.core.config.XTFConfig;
-import cz.xtf.core.openshift.OpenShift;
-import cz.xtf.core.openshift.PodShell;
-import cz.xtf.core.openshift.helpers.ResourceParsers;
-import cz.xtf.core.waiting.SimpleWaiter;
-import io.fabric8.kubernetes.api.model.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -26,11 +25,47 @@ public class ImageContent {
     public static final String RED_HAT_RELEASE_KEY_2_RPM = "gpg-pubkey-fd431d51-4ae0493b";
     public static final String RED_HAT_AUXILIARY_KEY_RPM = "gpg-pubkey-2fa658e0-45700c69";
     public static final String RED_HAT_AUXILIARY_KEY_2_RPM = "gpg-pubkey-d4082792-5b32db75";
-    public static final String[] DEFAULT_JAVA_UTILITIES = new String[] { "jjs", "keytool", "orbd", "rmid", "rmiregistry",
-            "servertool", "tnameserv", "unpack200", "javac", "appletviewer", "extcheck", "idlj", "jar", "jarsigner",
-            "javadoc", "javah", "javap", "jcmd", "jconsole", "jdb", "jdeps", "jhat", "jinfo", "jmap", "jps",
-            "jrunscript", "jsadebugd", "jstack", "jstat", "jstat", "jstatd", "native2ascii", "rmic", "schemagen",
-            "serialver", "wsgen", "wsimport", "xjc", "pack200" };
+    public static final String[] DEFAULT_JAVA_UTILITIES = new String[] {
+        "jjs",
+        "keytool",
+        "orbd",
+        "rmid",
+        "rmiregistry",
+        "servertool",
+        "tnameserv",
+        "unpack200",
+        "javac",
+        "appletviewer",
+        "extcheck",
+        "idlj",
+        "jar",
+        "jarsigner",
+        "javadoc",
+        "javah",
+        "javap",
+        "jcmd",
+        "jconsole",
+        "jdb",
+        "jdeps",
+        "jhat",
+        "jinfo",
+        "jmap",
+        "jps",
+        "jrunscript",
+        "jsadebugd",
+        "jstack",
+        "jstat",
+        "jstat",
+        "jstatd",
+        "native2ascii",
+        "rmic",
+        "schemagen",
+        "serialver",
+        "wsgen",
+        "wsimport",
+        "xjc",
+        "pack200"
+    };
 
     public static ImageContent prepare(OpenShift openShift, String imageUrl) {
         return ImageContent.prepare(openShift, imageUrl, "test-pod", null);
@@ -48,8 +83,8 @@ public class ImageContent {
         return ImageContent.prepare(openShift, imageUrl, name, command, Collections.emptyMap());
     }
 
-    public static ImageContent prepare(OpenShift openShift, String imageUrl, String name, List<String> command,
-            Map<String, String> envs) {
+    public static ImageContent prepare(
+            OpenShift openShift, String imageUrl, String name, List<String> command, Map<String, String> envs) {
         final Pod pod = ImageContent.getPod(imageUrl, name, command, envs);
 
         openShift.createPod(pod);
@@ -59,7 +94,8 @@ public class ImageContent {
             return p != null && ResourceParsers.isPodRunning(p) && ResourceParsers.isPodReady(p);
         };
 
-        new SimpleWaiter(bs, "Waiting for '" + name + "' pod to be running and ready").timeout(WaitingConfig.timeout())
+        new SimpleWaiter(bs, "Waiting for '" + name + "' pod to be running and ready")
+                .timeout(WaitingConfig.timeout())
                 .waitFor();
 
         return ImageContent.prepare(openShift, pod);
@@ -70,13 +106,15 @@ public class ImageContent {
     }
 
     private static Pod getPod(String imageUrl, String name, List<String> command, Map<String, String> envs) {
-        Container container = new ContainerBuilder().withName(name).withImage(imageUrl).build();
-        if (command != null)
-            container.setCommand(command);
-        container.setEnv(
-                envs.entrySet().stream().map(e -> new EnvVar(e.getKey(), e.getValue(), null)).collect(Collectors.toList()));
+        Container container =
+                new ContainerBuilder().withName(name).withImage(imageUrl).build();
+        if (command != null) container.setCommand(command);
+        container.setEnv(envs.entrySet().stream()
+                .map(e -> new EnvVar(e.getKey(), e.getValue(), null))
+                .collect(Collectors.toList()));
 
-        // Setting security context as required to comply with "restricted" pod security standards (since OCP 4.12/Kubernetes 1.25)
+        // Setting security context as required to comply with "restricted" pod security standards (since OCP
+        // 4.12/Kubernetes 1.25)
         // https://master.sdk.operatorframework.io/docs/best-practices/pod-security-standards/
         SeccompProfile secCom = new SeccompProfile();
         secCom.setType("RuntimeDefault");
@@ -150,7 +188,9 @@ public class ImageContent {
     }
 
     public String javaVersion() {
-        return shell.execute("java", "-version").getError().replaceAll("\n", "")
+        return shell.execute("java", "-version")
+                .getError()
+                .replaceAll("\n", "")
                 .replaceAll("openjdk version \"([0-9]+\\.[0-9]+\\.[0-9]+).*", "$1");
     }
 
@@ -179,7 +219,9 @@ public class ImageContent {
             mavenScriptInstalled = true;
         }
 
-        return shell.executeWithBash(mavenScriptPath).getOutput().replaceAll("\n", "")
+        return shell.executeWithBash(mavenScriptPath)
+                .getOutput()
+                .replaceAll("\n", "")
                 .replaceAll(".*Apache Maven ([0-9]+\\.[0-9]+\\.[0-9]+) .*", "$1");
     }
 
@@ -192,19 +234,21 @@ public class ImageContent {
     }
 
     public List<RpmPackage> rpms() {
-        return Stream.of(shell.executeWithBash("rpm -qa --info").getOutput().split("(?=Name {8}: )")).map(packageInfo -> {
-            Map<String, String> map = new HashMap<>();
+        return Stream.of(shell.executeWithBash("rpm -qa --info").getOutput().split("(?=Name {8}: )"))
+                .map(packageInfo -> {
+                    Map<String, String> map = new HashMap<>();
 
-            for (String infoLine : packageInfo.split("\n")) {
-                String[] splitted = infoLine.split(":", 2);
+                    for (String infoLine : packageInfo.split("\n")) {
+                        String[] splitted = infoLine.split(":", 2);
 
-                if (splitted[0].trim().equals("Description"))
-                    break;
+                        if (splitted[0].trim().equals("Description")) break;
 
-                map.put(splitted[0].trim(), splitted[1].trim());
-            }
-            return new RpmPackage(map.get("Name"), map.get("Version"), map.get("Release"), map.get("Signature"));
-        }).collect(Collectors.toList());
+                        map.put(splitted[0].trim(), splitted[1].trim());
+                    }
+                    return new RpmPackage(
+                            map.get("Name"), map.get("Version"), map.get("Release"), map.get("Signature"));
+                })
+                .collect(Collectors.toList());
     }
 
     @Getter

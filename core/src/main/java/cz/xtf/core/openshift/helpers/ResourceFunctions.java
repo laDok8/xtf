@@ -1,9 +1,8 @@
 package cz.xtf.core.openshift.helpers;
 
+import io.fabric8.kubernetes.api.model.Pod;
 import java.util.List;
 import java.util.function.Function;
-
-import io.fabric8.kubernetes.api.model.Pod;
 
 public class ResourceFunctions {
 
@@ -23,7 +22,5 @@ public class ResourceFunctions {
         return pods -> pods.stream().anyMatch(pod -> ResourceParsers.hasPodRestartedAtLeastNTimes(pod, n));
     }
 
-    private ResourceFunctions() {
-
-    }
+    private ResourceFunctions() {}
 }

@@ -1,5 +1,7 @@
 package cz.xtf.core.http;
 
+import cz.xtf.core.waiting.SupplierWaiter;
+import cz.xtf.core.waiting.Waiter;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -17,17 +19,12 @@ import java.security.cert.X509Certificate;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
-
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
-
-import org.apache.commons.io.FileUtils;
-
-import cz.xtf.core.waiting.SupplierWaiter;
-import cz.xtf.core.waiting.Waiter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
 
 @Slf4j
 public class Https {
@@ -119,7 +116,8 @@ public class Https {
 
             return connection;
         } catch (ProtocolException e) {
-            throw new HttpsException("Seems that time and IT has changed. Please contact creators for feature update!", e);
+            throw new HttpsException(
+                    "Seems that time and IT has changed. Please contact creators for feature update!", e);
         } catch (IOException e) {
             throw new HttpsException(e);
         }
@@ -159,7 +157,7 @@ public class Https {
     public static HttpsURLConnection getHttpsConnection(URL url) {
         try {
             SSLContext sslContext = SSLContext.getInstance("TLS");
-            sslContext.init(null, new TrustManager[] { new TrustAllManager() }, new SecureRandom());
+            sslContext.init(null, new TrustManager[] {new TrustAllManager()}, new SecureRandom());
 
             HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
             connection.setSSLSocketFactory(sslContext.getSocketFactory());
@@ -168,7 +166,8 @@ public class Https {
 
             return connection;
         } catch (NoSuchAlgorithmException | KeyManagementException | ProtocolException e) {
-            throw new HttpsException("Seems that time and IT has changed. Please contact creators for feature update!", e);
+            throw new HttpsException(
+                    "Seems that time and IT has changed. Please contact creators for feature update!", e);
         } catch (IOException e) {
             throw new HttpsException(e);
         }
@@ -222,12 +221,10 @@ public class Https {
     public static class TrustAllManager implements X509TrustManager {
 
         @Override
-        public void checkClientTrusted(X509Certificate[] x509Certificates, String s) {
-        }
+        public void checkClientTrusted(X509Certificate[] x509Certificates, String s) {}
 
         @Override
-        public void checkServerTrusted(X509Certificate[] x509Certificates, String s) {
-        }
+        public void checkServerTrusted(X509Certificate[] x509Certificates, String s) {}
 
         @Override
         public X509Certificate[] getAcceptedIssuers() {

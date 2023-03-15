@@ -1,12 +1,11 @@
 package cz.xtf.core.waiting.failfast;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import cz.xtf.core.bm.BuildManagers;
 import cz.xtf.core.openshift.OpenShift;
 import cz.xtf.core.openshift.OpenShifts;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * The class provides support to create {@link FailFastCheck} {@see MultipleFailFastChecksHandler} that checks if a waiter
@@ -14,7 +13,7 @@ import cz.xtf.core.openshift.OpenShifts;
  * If it returns true, the waiter should throw an exception.
  * <p>
  * Example of use:
- * 
+ *
  * <pre>
  * FailFastBuilder
  *         .ofTestAndBuildNamespace()
@@ -65,5 +64,4 @@ public class FailFastBuilder {
     public FailFastCheck build() {
         return new MultipleFailFastChecksHandler(failFastChecks);
     }
-
 }

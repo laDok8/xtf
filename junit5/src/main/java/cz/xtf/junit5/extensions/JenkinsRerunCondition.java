@@ -2,6 +2,7 @@ package cz.xtf.junit5.extensions;
 
 import static cz.xtf.core.http.Https.getHttpsConnection;
 
+import cz.xtf.junit5.config.JUnitConfig;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,11 +17,10 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.input.ReaderInputStream;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
@@ -31,15 +31,13 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import cz.xtf.junit5.config.JUnitConfig;
-import lombok.extern.slf4j.Slf4j;
-
 @Slf4j
 public class JenkinsRerunCondition implements ExecutionCondition {
 
-    private final static ConditionEvaluationResult ENABLED = ConditionEvaluationResult.enabled("not disabled");
-    private final static ConditionEvaluationResult ENABLED_NOT_CLASS = ConditionEvaluationResult.enabled("not a testclass");
-    private final static int BUILDS_TO_TRY = 20;
+    private static final ConditionEvaluationResult ENABLED = ConditionEvaluationResult.enabled("not disabled");
+    private static final ConditionEvaluationResult ENABLED_NOT_CLASS =
+            ConditionEvaluationResult.enabled("not a testclass");
+    private static final int BUILDS_TO_TRY = 20;
 
     // Class names containing at least one passed test
     private Set<String> passedTests;
@@ -65,9 +63,10 @@ public class JenkinsRerunCondition implements ExecutionCondition {
             // We operate on the class-level, as parsing test names is not reliable (due to parametrized tests and such)
             // We assume that if the previous run contains test of a class and no failures, it can be safely skip.
             if (!failedTests.contains(testClass.getName()) && passedTests.contains(testClass.getName())) {
-                log.debug("Excluding " + testClass.getName() + " containing only passed tests in previous test results");
-                return ConditionEvaluationResult.disabled("Disabling " + extensionContext.getDisplayName() + ", All tests from "
-                        + testClass.getName() + " passed in previous run");
+                log.debug(
+                        "Excluding " + testClass.getName() + " containing only passed tests in previous test results");
+                return ConditionEvaluationResult.disabled("Disabling " + extensionContext.getDisplayName()
+                        + ", All tests from " + testClass.getName() + " passed in previous run");
             }
         }
 
@@ -94,7 +93,8 @@ public class JenkinsRerunCondition implements ExecutionCondition {
         if (StringUtils.isNotBlank(username)) {
             log.info("curl -k --user " + username + ":<blank> " + url);
 
-            String basicAuth = Base64.getEncoder().encodeToString((username + ":" + password).getBytes(StandardCharsets.UTF_8));
+            String basicAuth =
+                    Base64.getEncoder().encodeToString((username + ":" + password).getBytes(StandardCharsets.UTF_8));
             connection.setRequestProperty("Authorization", "Basic " + basicAuth);
         } else {
             log.info("curl -k " + url);
@@ -130,7 +130,8 @@ public class JenkinsRerunCondition implements ExecutionCondition {
             int build = Integer.parseInt(buildNo);
             int minBuild = build - BUILDS_TO_TRY;
 
-            builds: for (--build; build >= minBuild; build--) {
+            builds:
+            for (--build; build >= minBuild; build--) {
                 String response;
                 try {
                     response = jenkinsHttpGet(prefix + "/" + build + "/api/xml");
@@ -197,7 +198,8 @@ public class JenkinsRerunCondition implements ExecutionCondition {
         passedTests = new HashSet<>();
         failedTests = new HashSet<>();
 
-        if (StringUtils.isNotBlank(jobToRerun) && ("true".equalsIgnoreCase(jobToRerun) || jobToRerun.startsWith("http"))) {
+        if (StringUtils.isNotBlank(jobToRerun)
+                && ("true".equalsIgnoreCase(jobToRerun) || jobToRerun.startsWith("http"))) {
 
             if (!jobToRerun.startsWith("http")) {
                 // any non-URL value means we should guess the URL on our own,
@@ -223,9 +225,14 @@ public class JenkinsRerunCondition implements ExecutionCondition {
                 for (int i = 0; i < nodeList.getLength(); ++i) {
                     Element caseElement = (Element) nodeList.item(i);
 
-                    String className = caseElement.getElementsByTagName("className").item(0).getTextContent();
-                    String status = caseElement.getElementsByTagName("status").item(0).getTextContent();
-                    String name = caseElement.getElementsByTagName("name").item(0).getTextContent();
+                    String className = caseElement
+                            .getElementsByTagName("className")
+                            .item(0)
+                            .getTextContent();
+                    String status =
+                            caseElement.getElementsByTagName("status").item(0).getTextContent();
+                    String name =
+                            caseElement.getElementsByTagName("name").item(0).getTextContent();
 
                     log.trace("className {} name {} status {}", className, name, status);
 

@@ -1,13 +1,12 @@
 package cz.xtf.core.event;
 
+import io.fabric8.kubernetes.api.model.Event;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Spliterator;
-
-import io.fabric8.kubernetes.api.model.Event;
 
 /**
  * List of events implementing {@link List} interface to easy up the work with events

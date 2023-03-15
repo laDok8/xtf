@@ -19,8 +19,8 @@ public class WatchedResourcesSupplier<X> implements FailFastCheck {
      * @param hasFailedFunction condition. The result is the result of {@link FailFastCheck#hasFailed()}
      * @param reasonFunction returns string as a reason why {@code hasFailed} returned {@code true}
      */
-    WatchedResourcesSupplier(Supplier<X> resourceSupplier, Function<X, Boolean> hasFailedFunction,
-            Function<X, String> reasonFunction) {
+    WatchedResourcesSupplier(
+            Supplier<X> resourceSupplier, Function<X, Boolean> hasFailedFunction, Function<X, String> reasonFunction) {
         this.resourceSupplier = resourceSupplier;
         this.hasFailedSupplier = hasFailedFunction;
         this.reasonSupplier = reasonFunction;
@@ -41,5 +41,4 @@ public class WatchedResourcesSupplier<X> implements FailFastCheck {
     public String reason() {
         return reason;
     }
-
 }

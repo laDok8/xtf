@@ -1,5 +1,7 @@
 package cz.xtf.builder.builders;
 
+import cz.xtf.builder.builders.secret.SecretType;
+import io.fabric8.kubernetes.api.model.Secret;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -9,11 +11,7 @@ import java.nio.file.Path;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
-
 import org.apache.commons.io.IOUtils;
-
-import cz.xtf.builder.builders.secret.SecretType;
-import io.fabric8.kubernetes.api.model.Secret;
 
 public class SecretBuilder extends AbstractBuilder<Secret, SecretBuilder> {
     private SecretType type = SecretType.OPAQUE;
@@ -89,5 +87,4 @@ public class SecretBuilder extends AbstractBuilder<Secret, SecretBuilder> {
         }
         return os.toByteArray();
     }
-
 }

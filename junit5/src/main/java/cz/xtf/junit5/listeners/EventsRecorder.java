@@ -2,6 +2,9 @@ package cz.xtf.junit5.listeners;
 
 import static org.junit.platform.engine.TestExecutionResult.Status.FAILED;
 
+import cz.xtf.core.openshift.OpenShift;
+import cz.xtf.core.openshift.OpenShifts;
+import io.fabric8.kubernetes.api.model.Event;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -10,16 +13,11 @@ import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-
+import lombok.extern.slf4j.Slf4j;
 import org.junit.platform.engine.TestExecutionResult;
 import org.junit.platform.launcher.TestExecutionListener;
 import org.junit.platform.launcher.TestIdentifier;
 import org.junit.platform.launcher.TestPlan;
-
-import cz.xtf.core.openshift.OpenShift;
-import cz.xtf.core.openshift.OpenShifts;
-import io.fabric8.kubernetes.api.model.Event;
-import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class EventsRecorder implements TestExecutionListener {
@@ -36,9 +34,8 @@ public class EventsRecorder implements TestExecutionListener {
     }
 
     private String getTestDisplayName(TestIdentifier testIdentifier) {
-        String className = testIdentifier.getParentId().get()
-                .replaceAll(".*class:", "")
-                .replaceAll("].*", "");
+        String className =
+                testIdentifier.getParentId().get().replaceAll(".*class:", "").replaceAll("].*", "");
         return String.format("%s#%s", className, testIdentifier.getDisplayName());
     }
 
@@ -49,8 +46,8 @@ public class EventsRecorder implements TestExecutionListener {
         if (openShift.getProject(openShift.getNamespace()) != null) {
             eventsLogPath.getParent().toFile().mkdirs();
 
-            try (final Writer writer = new OutputStreamWriter(new FileOutputStream(eventsLogPath.toFile()),
-                    StandardCharsets.UTF_8)) {
+            try (final Writer writer =
+                    new OutputStreamWriter(new FileOutputStream(eventsLogPath.toFile()), StandardCharsets.UTF_8)) {
                 writer.append("LAST SEEN");
                 writer.append('\t');
                 writer.append("FIRST SEEN");

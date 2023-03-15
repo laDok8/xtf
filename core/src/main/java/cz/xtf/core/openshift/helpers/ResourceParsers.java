@@ -23,7 +23,5 @@ public class ResourceParsers {
                 && pod.getStatus().getContainerStatuses().stream().anyMatch(x -> x.getRestartCount() >= n);
     }
 
-    private ResourceParsers() {
-
-    }
+    private ResourceParsers() {}
 }

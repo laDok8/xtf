@@ -1,12 +1,5 @@
 package cz.xtf.core.bm;
 
-import java.nio.file.Path;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-
 import cz.xtf.core.config.WaitingConfig;
 import cz.xtf.core.openshift.OpenShift;
 import cz.xtf.core.waiting.SimpleWaiter;
@@ -22,15 +15,22 @@ import io.fabric8.openshift.api.model.BuildConfigBuilder;
 import io.fabric8.openshift.api.model.BuildConfigSpecBuilder;
 import io.fabric8.openshift.api.model.ImageStream;
 import io.fabric8.openshift.api.model.ImageStreamBuilder;
+import java.nio.file.Path;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public abstract class BinaryBuild implements ManagedBuild {
-    static private final String CONTENT_HASH_LABEL_KEY = "xtf.bm/content-hash";
+    private static final String CONTENT_HASH_LABEL_KEY = "xtf.bm/content-hash";
 
     @Getter
     private final String id;
+
     @Getter
     private final Path path;
 
@@ -60,19 +60,42 @@ public abstract class BinaryBuild implements ManagedBuild {
 
     @Override
     public void delete(OpenShift openShift) {
-        openShift.imageStreams().withName(is.getMetadata().getName()).withPropagationPolicy(DeletionPropagation.BACKGROUND)
+        openShift
+                .imageStreams()
+                .withName(is.getMetadata().getName())
+                .withPropagationPolicy(DeletionPropagation.BACKGROUND)
                 .delete();
-        openShift.buildConfigs().withName(bc.getMetadata().getName()).withPropagationPolicy(DeletionPropagation.BACKGROUND)
+        openShift
+                .buildConfigs()
+                .withName(bc.getMetadata().getName())
+                .withPropagationPolicy(DeletionPropagation.BACKGROUND)
                 .delete();
         final String podName = bc.getMetadata().getName() + "-1-build";
-        openShift.pods().withName(podName).withPropagationPolicy(DeletionPropagation.BACKGROUND).delete();
+        openShift
+                .pods()
+                .withName(podName)
+                .withPropagationPolicy(DeletionPropagation.BACKGROUND)
+                .delete();
 
-        new SimpleWaiter(() -> openShift.getImageStream(is.getMetadata().getName()) == null, TimeUnit.MILLISECONDS,
-                WaitingConfig.timeout(), "Waiting for old imageStreams deletion").waitFor();
-        new SimpleWaiter(() -> openShift.getBuildConfig(bc.getMetadata().getName()) == null, TimeUnit.MILLISECONDS,
-                WaitingConfig.timeout(), "Waiting for old buildConfigs deletion").waitFor();
-        new SimpleWaiter(() -> openShift.getPods().stream().noneMatch(p -> podName.equals(p.getMetadata().getName())),
-                TimeUnit.MILLISECONDS, WaitingConfig.timeout(), "Waiting for old pods deletion").waitFor();
+        new SimpleWaiter(
+                        () -> openShift.getImageStream(is.getMetadata().getName()) == null,
+                        TimeUnit.MILLISECONDS,
+                        WaitingConfig.timeout(),
+                        "Waiting for old imageStreams deletion")
+                .waitFor();
+        new SimpleWaiter(
+                        () -> openShift.getBuildConfig(bc.getMetadata().getName()) == null,
+                        TimeUnit.MILLISECONDS,
+                        WaitingConfig.timeout(),
+                        "Waiting for old buildConfigs deletion")
+                .waitFor();
+        new SimpleWaiter(
+                        () -> openShift.getPods().stream()
+                                .noneMatch(p -> podName.equals(p.getMetadata().getName())),
+                        TimeUnit.MILLISECONDS,
+                        WaitingConfig.timeout(),
+                        "Waiting for old pods deletion")
+                .waitFor();
     }
 
     @Override
@@ -85,7 +108,8 @@ public abstract class BinaryBuild implements ManagedBuild {
 
     protected abstract List<EnvVar> getEnv(BuildConfig bc);
 
-    protected abstract void configureBuildStrategy(BuildConfigSpecBuilder builder, String builderImage, List<EnvVar> envs);
+    protected abstract void configureBuildStrategy(
+            BuildConfigSpecBuilder builder, String builderImage, List<EnvVar> envs);
 
     protected abstract String getImage(BuildConfig bc);
 
@@ -140,7 +164,10 @@ public abstract class BinaryBuild implements ManagedBuild {
                     } else if (!envVar.getValue().equals(envProperties.get(envVar.getName()))) {
                         needsUpdate = true;
 
-                        log.debug("env {}={} in BC, but {} in envProperties", envVar.getName(), envVar.getValue(),
+                        log.debug(
+                                "env {}={} in BC, but {} in envProperties",
+                                envVar.getName(),
+                                envVar.getValue(),
                                 envProperties.get(envVar.getName()));
                         break;
                     }
@@ -156,8 +183,10 @@ public abstract class BinaryBuild implements ManagedBuild {
                 log.debug("No build last version");
                 needsUpdate = true;
             } else {
-                Build activeBuild = openShift.getBuild(id + "-" + activeBc.getStatus().getLastVersion());
-                if (activeBuild == null || activeBuild.getStatus() == null
+                Build activeBuild =
+                        openShift.getBuild(id + "-" + activeBc.getStatus().getLastVersion());
+                if (activeBuild == null
+                        || activeBuild.getStatus() == null
                         || "Failed".equals(activeBuild.getStatus().getPhase())) {
                     log.debug("Build failed");
                     needsUpdate = true;
@@ -183,19 +212,34 @@ public abstract class BinaryBuild implements ManagedBuild {
 
         if (envProperties != null) {
             for (Map.Entry<String, String> env : envProperties.entrySet()) {
-                envVarList.add(new EnvVarBuilder().withName(env.getKey()).withValue(env.getValue()).build());
+                envVarList.add(new EnvVarBuilder()
+                        .withName(env.getKey())
+                        .withValue(env.getValue())
+                        .build());
             }
         }
 
-        ObjectMeta metadata = new ObjectMetaBuilder().withName(id)
-                .withLabels(Collections.singletonMap(CONTENT_HASH_LABEL_KEY, getContentHash())).build();
+        ObjectMeta metadata = new ObjectMetaBuilder()
+                .withName(id)
+                .withLabels(Collections.singletonMap(CONTENT_HASH_LABEL_KEY, getContentHash()))
+                .build();
         BuildConfigSpecBuilder bcBuilder = new BuildConfigSpecBuilder();
         bcBuilder
-                .withNewOutput().withNewTo().withKind("ImageStreamTag").withName(id + ":latest").endTo().endOutput()
-                .withNewSource().withType("Binary").endSource();
+                .withNewOutput()
+                .withNewTo()
+                .withKind("ImageStreamTag")
+                .withName(id + ":latest")
+                .endTo()
+                .endOutput()
+                .withNewSource()
+                .withType("Binary")
+                .endSource();
 
         configureBuildStrategy(bcBuilder, builderImage, envVarList);
 
-        return new BuildConfigBuilder().withMetadata(metadata).withSpec(bcBuilder.build()).build();
+        return new BuildConfigBuilder()
+                .withMetadata(metadata)
+                .withSpec(bcBuilder.build())
+                .build();
     }
 }

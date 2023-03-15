@@ -2,26 +2,23 @@ package cz.xtf.junit5.listeners;
 
 import static org.junit.platform.engine.TestExecutionResult.Status.FAILED;
 
-import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-
-import org.junit.platform.engine.TestExecutionResult;
-import org.junit.platform.launcher.TestExecutionListener;
-import org.junit.platform.launcher.TestIdentifier;
-
 import cz.xtf.core.openshift.OpenShift;
 import cz.xtf.core.openshift.OpenShifts;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.client.KubernetesClientException;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.platform.engine.TestExecutionResult;
+import org.junit.platform.launcher.TestExecutionListener;
+import org.junit.platform.launcher.TestIdentifier;
 
 @Slf4j
 public class PodLogRecorder implements TestExecutionListener {
     private String getTestDisplayName(TestIdentifier testIdentifier) {
-        String className = testIdentifier.getParentId().get()
-                .replaceAll(".*class:", "")
-                .replaceAll("].*", "");
+        String className =
+                testIdentifier.getParentId().get().replaceAll(".*class:", "").replaceAll("].*", "");
         return String.format("%s#%s", className, testIdentifier.getDisplayName());
     }
 

@@ -1,5 +1,14 @@
 package cz.xtf.junit5.extensions;
 
+import cz.xtf.core.bm.BuildManagers;
+import cz.xtf.core.config.XTFConfig;
+import cz.xtf.core.openshift.OpenShift;
+import cz.xtf.core.openshift.OpenShifts;
+import cz.xtf.core.service.logs.streaming.AnnotationBasedServiceLogsConfigurations;
+import cz.xtf.core.service.logs.streaming.ServiceLogs;
+import cz.xtf.core.service.logs.streaming.ServiceLogsSettings;
+import cz.xtf.core.service.logs.streaming.SystemPropertyBasedServiceLogsConfigurations;
+import cz.xtf.core.service.logs.streaming.k8s.PodLogs;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -10,21 +19,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
-
-import cz.xtf.core.bm.BuildManagers;
-import cz.xtf.core.config.XTFConfig;
-import cz.xtf.core.openshift.OpenShift;
-import cz.xtf.core.openshift.OpenShifts;
-import cz.xtf.core.service.logs.streaming.AnnotationBasedServiceLogsConfigurations;
-import cz.xtf.core.service.logs.streaming.ServiceLogs;
-import cz.xtf.core.service.logs.streaming.ServiceLogsSettings;
-import cz.xtf.core.service.logs.streaming.SystemPropertyBasedServiceLogsConfigurations;
-import cz.xtf.core.service.logs.streaming.k8s.PodLogs;
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * Implements {@link BeforeAllCallback} in order to provide the logic to retrieve the Service Logs Streaming
@@ -52,11 +50,13 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class ServiceLogsStreamingRunner implements BeforeAllCallback, AfterAllCallback {
-    private static final ExtensionContext.Namespace NAMESPACE = ExtensionContext.Namespace.create("cz", "xtf", "junit",
-            "extensions", "ServiceLogsRunner");
+    private static final ExtensionContext.Namespace NAMESPACE =
+            ExtensionContext.Namespace.create("cz", "xtf", "junit", "extensions", "ServiceLogsRunner");
 
-    private static final String SERVICE_LOGS_PROPERTY_BASED_CONFIGURATIONS = "SERVICE_LOGS:PROPERTY_BASED_CONFIGURATIONS";
-    private static final String SERVICE_LOGS_ANNOTATION_BASED_CONFIGURATIONS = "SERVICE_LOGS:ANNOTATION_BASED_CONFIGURATIONS";
+    private static final String SERVICE_LOGS_PROPERTY_BASED_CONFIGURATIONS =
+            "SERVICE_LOGS:PROPERTY_BASED_CONFIGURATIONS";
+    private static final String SERVICE_LOGS_ANNOTATION_BASED_CONFIGURATIONS =
+            "SERVICE_LOGS:ANNOTATION_BASED_CONFIGURATIONS";
     private static final String SERVICE_LOGS_OUTPUT_STREAMS = "SERVICE_LOGS:OUTPUT_STREAMS";
     private static final String SERVICE_LOGS = "SERVICE_LOGS";
 
@@ -86,8 +86,8 @@ public class ServiceLogsStreamingRunner implements BeforeAllCallback, AfterAllCa
     private void enableServiceLogsStreamingForAllTests(ExtensionContext extensionContext) {
         ExtensionContext.Store store = extensionContext.getStore(NAMESPACE);
         String key = SERVICE_LOGS_PROPERTY_BASED_CONFIGURATIONS;
-        SystemPropertyBasedServiceLogsConfigurations systemPropertyBasedServiceLogsConfigurations = store.get(key,
-                SystemPropertyBasedServiceLogsConfigurations.class);
+        SystemPropertyBasedServiceLogsConfigurations systemPropertyBasedServiceLogsConfigurations =
+                store.get(key, SystemPropertyBasedServiceLogsConfigurations.class);
         if (systemPropertyBasedServiceLogsConfigurations != null) {
             store.remove(key);
         }
@@ -105,15 +105,14 @@ public class ServiceLogsStreamingRunner implements BeforeAllCallback, AfterAllCa
             ExtensionContext extensionContext) {
         ExtensionContext.Store store = extensionContext.getStore(NAMESPACE);
         String key = SERVICE_LOGS_PROPERTY_BASED_CONFIGURATIONS;
-        SystemPropertyBasedServiceLogsConfigurations systemPropertyBasedServiceLogsConfigurations = store.get(key,
-                SystemPropertyBasedServiceLogsConfigurations.class);
+        SystemPropertyBasedServiceLogsConfigurations systemPropertyBasedServiceLogsConfigurations =
+                store.get(key, SystemPropertyBasedServiceLogsConfigurations.class);
         if (systemPropertyBasedServiceLogsConfigurations == null) {
             final String serviceLogsStreamingConfig = getServiceLogsStreamingConfigPropertyValue();
             // if the property is not set, then there will be no configurations at all
-            if ((serviceLogsStreamingConfig != null)
-                    && (!serviceLogsStreamingConfig.isEmpty())) {
-                systemPropertyBasedServiceLogsConfigurations = new SystemPropertyBasedServiceLogsConfigurations(
-                        serviceLogsStreamingConfig);
+            if ((serviceLogsStreamingConfig != null) && (!serviceLogsStreamingConfig.isEmpty())) {
+                systemPropertyBasedServiceLogsConfigurations =
+                        new SystemPropertyBasedServiceLogsConfigurations(serviceLogsStreamingConfig);
                 store.put(key, systemPropertyBasedServiceLogsConfigurations);
             }
         }
@@ -131,8 +130,8 @@ public class ServiceLogsStreamingRunner implements BeforeAllCallback, AfterAllCa
             ExtensionContext extensionContext) {
         ExtensionContext.Store store = extensionContext.getStore(NAMESPACE);
         String key = SERVICE_LOGS_ANNOTATION_BASED_CONFIGURATIONS;
-        AnnotationBasedServiceLogsConfigurations annotationBasedServiceLogsConfigurations = store.get(key,
-                AnnotationBasedServiceLogsConfigurations.class);
+        AnnotationBasedServiceLogsConfigurations annotationBasedServiceLogsConfigurations =
+                store.get(key, AnnotationBasedServiceLogsConfigurations.class);
         if (annotationBasedServiceLogsConfigurations == null) {
             annotationBasedServiceLogsConfigurations = new AnnotationBasedServiceLogsConfigurations();
             store.put(key, annotationBasedServiceLogsConfigurations);
@@ -160,7 +159,7 @@ public class ServiceLogsStreamingRunner implements BeforeAllCallback, AfterAllCa
     /**
      * Access the execution context {@link OutputStream} instances that represent the output of existing
      * {@link ServiceLogs} instances
-     * 
+     *
      * @param extensionContext The current test execution context
      * @return A list of {@link OutputStream} instances that represent the output of existing {@link ServiceLogs}
      *         instances
@@ -206,7 +205,8 @@ public class ServiceLogsStreamingRunner implements BeforeAllCallback, AfterAllCa
         if (currentClazzServiceLogsSettings != null) {
             // start the service logs, which is lazily initialized and added to the extension context store
             ServiceLogs serviceLogs = createServiceLogs(extensionContext, currentClazzServiceLogsSettings);
-            serviceLogs(extensionContext).put(extensionContext.getRequiredTestClass().getName(), serviceLogs);
+            serviceLogs(extensionContext)
+                    .put(extensionContext.getRequiredTestClass().getName(), serviceLogs);
             serviceLogs.start();
         }
     }
@@ -221,15 +221,15 @@ public class ServiceLogsStreamingRunner implements BeforeAllCallback, AfterAllCa
      */
     private ServiceLogsSettings retrieveServiceLogsSettings(ExtensionContext extensionContext) {
         if (systemPropertyBasedServiceLogsConfigurations(extensionContext) != null) {
-            ServiceLogsSettings currentClazzServiceLogsSettings = systemPropertyBasedServiceLogsConfigurations(extensionContext)
-                    .forClass(
-                            extensionContext.getRequiredTestClass());
+            ServiceLogsSettings currentClazzServiceLogsSettings = systemPropertyBasedServiceLogsConfigurations(
+                            extensionContext)
+                    .forClass(extensionContext.getRequiredTestClass());
             if (currentClazzServiceLogsSettings != null) {
                 return currentClazzServiceLogsSettings;
             }
         }
-        return annotationBasedServiceLogsConfigurations(extensionContext).forClass(
-                extensionContext.getRequiredTestClass());
+        return annotationBasedServiceLogsConfigurations(extensionContext)
+                .forClass(extensionContext.getRequiredTestClass());
     }
 
     /**
@@ -240,8 +240,8 @@ public class ServiceLogsStreamingRunner implements BeforeAllCallback, AfterAllCa
      *        instance for a given test class
      * @return A concrete {@link ServiceLogs} instance for a given test class
      */
-    private ServiceLogs createServiceLogs(ExtensionContext extensionContext,
-            ServiceLogsSettings testClazzServiceLogsSettings) {
+    private ServiceLogs createServiceLogs(
+            ExtensionContext extensionContext, ServiceLogsSettings testClazzServiceLogsSettings) {
         log.debug("createServiceLogs");
         ServiceLogs serviceLogs;
 
@@ -265,13 +265,16 @@ public class ServiceLogsStreamingRunner implements BeforeAllCallback, AfterAllCa
                     throw new IllegalStateException(
                             "Cannot create SLS base output path: " + testClazzServiceLogsSettings.getOutputPath());
                 }
-                File outputFile = new File(testClazzServiceLogsSettings.getOutputPath(),
+                File outputFile = new File(
+                        testClazzServiceLogsSettings.getOutputPath(),
                         extensionContext.getRequiredTestClass().getName());
                 out = new PrintStream(new FileOutputStream(outputFile));
                 serviceLogsOutputStreams(extensionContext).add(out);
             } catch (FileNotFoundException e) {
-                log.warn("Could not create file stream {} because of the following error: {}. Redirecting to System.out",
-                        testClazzServiceLogsSettings.getOutputPath(), e.getMessage());
+                log.warn(
+                        "Could not create file stream {} because of the following error: {}. Redirecting to System.out",
+                        testClazzServiceLogsSettings.getOutputPath(),
+                        e.getMessage());
             }
         }
         serviceLogs = new PodLogs.Builder()
@@ -280,8 +283,10 @@ public class ServiceLogsStreamingRunner implements BeforeAllCallback, AfterAllCa
                 // The life cycle of the PrintStream instance that is being passed on to ServiceLogs
                 // must be handled in the outer scope, which is not (usually) here.
                 .outputTo(out)
-                .filter(ServiceLogsSettings.UNASSIGNED.equals(testClazzServiceLogsSettings.getFilter()) ? null
-                        : testClazzServiceLogsSettings.getFilter())
+                .filter(
+                        ServiceLogsSettings.UNASSIGNED.equals(testClazzServiceLogsSettings.getFilter())
+                                ? null
+                                : testClazzServiceLogsSettings.getFilter())
                 .build();
 
         return serviceLogs;

@@ -5,5 +5,4 @@ public interface ResourceLimitBuilder {
     ComputingResource addCPUResource();
 
     ComputingResource addMemoryResource();
-
 }

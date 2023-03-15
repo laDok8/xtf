@@ -1,7 +1,7 @@
 package cz.xtf.junit5.extensions;
 
+import cz.xtf.junit5.config.JUnitConfig;
 import java.io.IOException;
-
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -10,8 +10,6 @@ import org.junit.jupiter.api.extension.TestExecutionExceptionHandler;
 import org.junit.jupiter.api.extension.TestWatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import cz.xtf.junit5.config.JUnitConfig;
 
 /**
  * Implements JUnit lifecycle events handling in order to record OCP state for different purposes (e.g.: debug).
@@ -37,8 +35,12 @@ import cz.xtf.junit5.config.JUnitConfig;
  * in case {@code xtf.record.before} is set</li>
  * <li>{@link TestWatcher#testSuccessful(ExtensionContext)} in case {@code xtf.record.before} is set</li>
  */
-public class OpenShiftRecorderHandler implements TestWatcher, TestExecutionExceptionHandler, BeforeAllCallback,
-        BeforeEachCallback, LifecycleMethodExecutionExceptionHandler {
+public class OpenShiftRecorderHandler
+        implements TestWatcher,
+                TestExecutionExceptionHandler,
+                BeforeAllCallback,
+                BeforeEachCallback,
+                LifecycleMethodExecutionExceptionHandler {
     private static final Logger log = LoggerFactory.getLogger(OpenShiftRecorderHandler.class);
 
     private final OpenShiftRecorderService openShiftRecorderService;

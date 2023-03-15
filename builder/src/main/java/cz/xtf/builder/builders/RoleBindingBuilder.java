@@ -94,26 +94,21 @@ public class RoleBindingBuilder extends AbstractBuilder<RoleBinding, RoleBinding
 
     @Override
     public RoleBinding build() {
-        RoleBindingFluent.SubjectsNested<io.fabric8.kubernetes.api.model.rbac.RoleBindingBuilder> subject = new io.fabric8.kubernetes.api.model.rbac.RoleBindingBuilder()
-                .withNewMetadata()
-                .withName(this.getName())
-                .endMetadata()
-                .addNewSubject()
-                .withKind(subjectKind)
-                .withName(subjectName);
+        RoleBindingFluent.SubjectsNested<io.fabric8.kubernetes.api.model.rbac.RoleBindingBuilder> subject =
+                new io.fabric8.kubernetes.api.model.rbac.RoleBindingBuilder()
+                        .withNewMetadata()
+                        .withName(this.getName())
+                        .endMetadata()
+                        .addNewSubject()
+                        .withKind(subjectKind)
+                        .withName(subjectName);
 
-        if (subjectNamespace != null && !subjectNamespace.isEmpty())
-            subject.withNamespace(subjectNamespace);
+        if (subjectNamespace != null && !subjectNamespace.isEmpty()) subject.withNamespace(subjectNamespace);
 
-        RoleBindingFluent.RoleRefNested<io.fabric8.kubernetes.api.model.rbac.RoleBindingBuilder> roleRef = subject
-                .endSubject()
-                .withNewRoleRef()
-                .withKind(roleRefKind)
-                .withName(roleRefName);
+        RoleBindingFluent.RoleRefNested<io.fabric8.kubernetes.api.model.rbac.RoleBindingBuilder> roleRef =
+                subject.endSubject().withNewRoleRef().withKind(roleRefKind).withName(roleRefName);
 
-        return roleRef
-                .endRoleRef()
-                .build();
+        return roleRef.endRoleRef().build();
     }
 
     @Override

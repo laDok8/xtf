@@ -1,14 +1,12 @@
 package cz.xtf.core.waiting;
 
-import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
-import java.util.function.Supplier;
-
-import org.slf4j.event.Level;
-
 import cz.xtf.core.config.WaitingConfig;
 import cz.xtf.core.waiting.failfast.ExponentialTimeBackoff;
 import cz.xtf.core.waiting.failfast.FailFastCheck;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import org.slf4j.event.Level;
 
 public class SupplierWaiter<X> implements Waiter {
     private Supplier<X> supplier;
@@ -32,7 +30,8 @@ public class SupplierWaiter<X> implements Waiter {
         this(supplier, successCondition, x -> false);
     }
 
-    public SupplierWaiter(Supplier<X> supplier, Function<X, Boolean> successCondition, Function<X, Boolean> failureCondition) {
+    public SupplierWaiter(
+            Supplier<X> supplier, Function<X, Boolean> successCondition, Function<X, Boolean> failureCondition) {
         this(supplier, successCondition, failureCondition, TimeUnit.MILLISECONDS, WaitingConfig.timeout());
     }
 
@@ -40,39 +39,52 @@ public class SupplierWaiter<X> implements Waiter {
         this(supplier, successCondition, x -> false, reason);
     }
 
-    public SupplierWaiter(Supplier<X> supplier, Function<X, Boolean> successCondition, Function<X, Boolean> failureCondition,
+    public SupplierWaiter(
+            Supplier<X> supplier,
+            Function<X, Boolean> successCondition,
+            Function<X, Boolean> failureCondition,
             String reason) {
         this(supplier, successCondition, failureCondition, TimeUnit.MILLISECONDS, WaitingConfig.timeout(), reason);
     }
 
-    public SupplierWaiter(Supplier<X> supplier, Function<X, Boolean> successCondition, TimeUnit timeoutUnit, long timeout) {
+    public SupplierWaiter(
+            Supplier<X> supplier, Function<X, Boolean> successCondition, TimeUnit timeoutUnit, long timeout) {
         this(supplier, successCondition, x -> false, timeoutUnit, timeout);
     }
 
-    public SupplierWaiter(Supplier<X> supplier, Function<X, Boolean> successCondition, TimeUnit timeoutUnit, long timeout,
+    public SupplierWaiter(
+            Supplier<X> supplier,
+            Function<X, Boolean> successCondition,
+            TimeUnit timeoutUnit,
+            long timeout,
             String reason) {
         this(supplier, successCondition, x -> false, timeoutUnit, timeout, reason);
     }
 
-    public SupplierWaiter(Supplier<X> supplier, Function<X, Boolean> successCondition, Function<X, Boolean> failureCondition,
-            TimeUnit timeoutUnit, long timeout) {
+    public SupplierWaiter(
+            Supplier<X> supplier,
+            Function<X, Boolean> successCondition,
+            Function<X, Boolean> failureCondition,
+            TimeUnit timeoutUnit,
+            long timeout) {
         this(supplier, successCondition, failureCondition, timeoutUnit, timeout, null);
     }
 
-    public SupplierWaiter(Supplier<X> supplier, Function<X, Boolean> successCondition, Function<X, Boolean> failureCondition,
-            TimeUnit timeoutUnit, long timeout, String reason) {
+    public SupplierWaiter(
+            Supplier<X> supplier,
+            Function<X, Boolean> successCondition,
+            Function<X, Boolean> failureCondition,
+            TimeUnit timeoutUnit,
+            long timeout,
+            String reason) {
         this.supplier = supplier;
         this.successCondition = successCondition;
         this.failureCondition = failureCondition;
 
-        this.onIteration = () -> {
-        };
-        this.onSuccess = () -> {
-        };
-        this.onFailure = () -> {
-        };
-        this.onTimeout = () -> {
-        };
+        this.onIteration = () -> {};
+        this.onSuccess = () -> {};
+        this.onFailure = () -> {};
+        this.onTimeout = () -> {};
 
         this.failFast = () -> false;
 

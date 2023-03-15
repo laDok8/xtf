@@ -60,5 +60,4 @@ public class LivenessProbe extends AbstractProbe {
             builder.withPeriodSeconds(periodSeconds);
         }
     }
-
 }

@@ -9,10 +9,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-
-import org.apache.commons.io.IOUtils;
-
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.IOUtils;
 
 @Slf4j
 public class CLIUtils {
@@ -29,14 +27,16 @@ public class CLIUtils {
             ExecutorService es = Executors.newFixedThreadPool(2);
 
             Future<String> out = es.submit(() -> {
-                try (InputStream is = p.getInputStream(); StringWriter sw = new StringWriter()) {
+                try (InputStream is = p.getInputStream();
+                        StringWriter sw = new StringWriter()) {
                     IOUtils.copy(is, sw);
                     return sw.toString();
                 }
             });
 
             Future<String> err = es.submit(() -> {
-                try (InputStream is = p.getErrorStream(); StringWriter sw = new StringWriter()) {
+                try (InputStream is = p.getErrorStream();
+                        StringWriter sw = new StringWriter()) {
                     IOUtils.copy(is, sw);
                     return sw.toString();
                 }

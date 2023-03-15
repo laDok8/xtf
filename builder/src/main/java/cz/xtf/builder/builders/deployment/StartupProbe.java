@@ -39,6 +39,5 @@ public class StartupProbe extends AbstractProbe {
         if (initialDelay > 0) {
             builder.withInitialDelaySeconds(initialDelay);
         }
-
     }
 }

@@ -29,8 +29,7 @@ enum OpenShiftBinaryManagerFactory {
     }
 
     private List<OpenShiftBinaryPathResolver> resolverList() {
-        return Stream.of(
-                new ConfiguredPathOpenShiftBinaryResolver(),
-                new ClusterVersionOpenShiftBinaryPathResolver()).collect(Collectors.toList());
+        return Stream.of(new ConfiguredPathOpenShiftBinaryResolver(), new ClusterVersionOpenShiftBinaryPathResolver())
+                .collect(Collectors.toList());
     }
 }

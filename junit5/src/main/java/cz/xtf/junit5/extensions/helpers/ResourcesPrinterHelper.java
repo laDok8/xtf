@@ -1,16 +1,5 @@
 package cz.xtf.junit5.extensions.helpers;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.function.Function;
-
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.ContainerStatus;
 import io.fabric8.kubernetes.api.model.Event;
@@ -23,6 +12,16 @@ import io.fabric8.openshift.api.model.BuildConfig;
 import io.fabric8.openshift.api.model.DeploymentConfig;
 import io.fabric8.openshift.api.model.ImageStream;
 import io.fabric8.openshift.api.model.Route;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.function.Function;
 
 public class ResourcesPrinterHelper<X> implements AutoCloseable {
     private final Path file;
@@ -84,7 +83,10 @@ public class ResourcesPrinterHelper<X> implements AutoCloseable {
     private static LinkedHashMap<String, String> getStatefulSetCols(StatefulSet statefulSet) {
         LinkedHashMap<String, String> map = new LinkedHashMap<>(2);
         map.put("NAME", statefulSet.getMetadata().getName());
-        map.put("REPLICAS", statefulSet.getStatus().getReadyReplicas() + "/" + statefulSet.getStatus().getReplicas());
+        map.put(
+                "REPLICAS",
+                statefulSet.getStatus().getReadyReplicas() + "/"
+                        + statefulSet.getStatus().getReplicas());
         return map;
     }
 
@@ -112,8 +114,11 @@ public class ResourcesPrinterHelper<X> implements AutoCloseable {
         map.put("FROM", build.getSpec().getSource().getType());
         map.put("STATUS", build.getStatus().getPhase());
         map.put("STARTED", build.getStatus().getStartTimestamp());
-        map.put("DURATION",
-                build.getStatus().getDuration() == null ? "" : (build.getStatus().getDuration() / 1000000000) + "s");
+        map.put(
+                "DURATION",
+                build.getStatus().getDuration() == null
+                        ? ""
+                        : (build.getStatus().getDuration() / 1000000000) + "s");
         return map;
     }
 
@@ -124,8 +129,10 @@ public class ResourcesPrinterHelper<X> implements AutoCloseable {
         map.put("COUNT", String.valueOf(event.getCount()));
         map.put("TYPE", event.getType());
         map.put("REASON", event.getReason());
-        map.put("OBJECT", event.getInvolvedObject().getKind() + "/"
-                + event.getInvolvedObject().getName().replaceFirst("(.*?)\\..*", "$1"));
+        map.put(
+                "OBJECT",
+                event.getInvolvedObject().getKind() + "/"
+                        + event.getInvolvedObject().getName().replaceFirst("(.*?)\\..*", "$1"));
         map.put("MESSAGE", event.getMessage());
         return map;
     }
@@ -135,7 +142,9 @@ public class ResourcesPrinterHelper<X> implements AutoCloseable {
                 .map(ContainerStatus::getRestartCount)
                 .mapToInt(Integer::intValue)
                 .sum();
-        long ready = pod.getStatus().getContainerStatuses().stream().filter(ContainerStatus::getReady).count();
+        long ready = pod.getStatus().getContainerStatuses().stream()
+                .filter(ContainerStatus::getReady)
+                .count();
         long total = pod.getStatus().getContainerStatuses().size();
 
         LinkedHashMap<String, String> map = new LinkedHashMap<>(4);
@@ -149,7 +158,9 @@ public class ResourcesPrinterHelper<X> implements AutoCloseable {
     private static LinkedHashMap<String, String> getDCsCols(DeploymentConfig dc) {
         LinkedHashMap<String, String> map = new LinkedHashMap<>(2);
         map.put("NAME", dc.getMetadata().getName());
-        map.put("READY", dc.getStatus().getReadyReplicas() + "/" + dc.getStatus().getReplicas());
+        map.put(
+                "READY",
+                dc.getStatus().getReadyReplicas() + "/" + dc.getStatus().getReplicas());
         return map;
     }
 
@@ -176,11 +187,14 @@ public class ResourcesPrinterHelper<X> implements AutoCloseable {
 
     private static LinkedHashMap<String, String> getServicesCols(Service service) {
         final StringBuilder selector = new StringBuilder();
-        service.getSpec().getSelector().forEach((k, v) -> selector.append(k).append("=").append(v).append(";"));
+        service.getSpec()
+                .getSelector()
+                .forEach((k, v) -> selector.append(k).append("=").append(v).append(";"));
         final StringBuilder ports = new StringBuilder();
-        service.getSpec().getPorts().stream()
-                .forEach(
-                        port -> ports.append(port.getPort()).append("->").append(port.getTargetPort().getIntVal()).append(";"));
+        service.getSpec().getPorts().stream().forEach(port -> ports.append(port.getPort())
+                .append("->")
+                .append(port.getTargetPort().getIntVal())
+                .append(";"));
 
         LinkedHashMap<String, String> map = new LinkedHashMap<>(3);
         map.put("NAME", service.getMetadata().getName());
@@ -224,7 +238,8 @@ public class ResourcesPrinterHelper<X> implements AutoCloseable {
     public void flush() throws IOException {
         file.getParent().toFile().mkdirs();
 
-        try (final Writer writer = new OutputStreamWriter(new FileOutputStream(file.toFile()), StandardCharsets.UTF_8)) {
+        try (final Writer writer =
+                new OutputStreamWriter(new FileOutputStream(file.toFile()), StandardCharsets.UTF_8)) {
             if (!rows.isEmpty()) {
                 StringBuilder formatBuilder = new StringBuilder();
                 for (int maxLength : maxLengths) {

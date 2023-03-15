@@ -9,7 +9,7 @@ public enum ClusterVersionInfoFactory {
         return getClusterVersionInfo(false);
     }
 
-    //just for reloading version on tests
+    // just for reloading version on tests
     public ClusterVersionInfo getClusterVersionInfo(boolean reload) {
         if (reload) {
             clusterVersionInfo = null;

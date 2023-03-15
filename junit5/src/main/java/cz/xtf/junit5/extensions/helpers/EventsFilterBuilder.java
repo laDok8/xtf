@@ -1,8 +1,7 @@
 package cz.xtf.junit5.extensions.helpers;
 
-import java.time.ZonedDateTime;
-
 import io.fabric8.kubernetes.api.model.Event;
+import java.time.ZonedDateTime;
 
 public class EventsFilterBuilder extends ResourcesFilterBuilder<Event> {
 
@@ -14,7 +13,8 @@ public class EventsFilterBuilder extends ResourcesFilterBuilder<Event> {
     @Override
     ZonedDateTime getResourceTime(Event event) {
         String result = event.getLastTimestamp();
-        return result == null ? super.getResourceTime(event)
+        return result == null
+                ? super.getResourceTime(event)
                 : ResourcesTimestampHelper.parseZonedDateTime(event.getLastTimestamp());
     }
 }

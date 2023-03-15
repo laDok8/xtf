@@ -15,8 +15,12 @@ public class HelmConfig {
     }
 
     public static String binaryCachePath() {
-        return XTFConfig.get(HELM_BINARY_CACHE_PATH, Paths.get(System.getProperty("java.io.tmpdir"),
-                HELM_BINARY_CACHE_DEFAULT_FOLDER).toAbsolutePath().normalize().toString());
+        return XTFConfig.get(
+                HELM_BINARY_CACHE_PATH,
+                Paths.get(System.getProperty("java.io.tmpdir"), HELM_BINARY_CACHE_DEFAULT_FOLDER)
+                        .toAbsolutePath()
+                        .normalize()
+                        .toString());
     }
 
     public static String binaryPath() {
@@ -26,5 +30,4 @@ public class HelmConfig {
     public static String helmClientVersion() {
         return XTFConfig.get(HELM_CLIENT_VERSION, "latest");
     }
-
 }

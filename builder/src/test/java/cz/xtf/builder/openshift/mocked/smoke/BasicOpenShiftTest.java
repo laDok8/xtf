@@ -1,12 +1,5 @@
 package cz.xtf.builder.openshift.mocked.smoke;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-
-import org.junit.Assert;
-import org.junit.jupiter.api.Test;
-
 import cz.xtf.builder.builders.ConfigMapBuilder;
 import cz.xtf.builder.builders.DeploymentConfigBuilder;
 import cz.xtf.core.openshift.OpenShift;
@@ -15,13 +8,18 @@ import io.fabric8.kubernetes.api.model.PodSpec;
 import io.fabric8.openshift.api.model.DeploymentConfig;
 import io.fabric8.openshift.client.OpenShiftClient;
 import io.fabric8.openshift.client.server.mock.OpenShiftServer;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import org.junit.Assert;
+import org.junit.jupiter.api.Test;
 
 public class BasicOpenShiftTest {
 
     private static final String TEST_RESOURCE_LABEL_NAME_APP = "app";
     private static final String TEST_RESOURCE_LABEL_VALUE_APP = "xtf-core-test-openshift-mocked-smoke";
-    private final static Map<String, String> TEST_RESOURCE_LABELS = Collections.singletonMap(
-            TEST_RESOURCE_LABEL_NAME_APP, TEST_RESOURCE_LABEL_VALUE_APP);
+    private static final Map<String, String> TEST_RESOURCE_LABELS =
+            Collections.singletonMap(TEST_RESOURCE_LABEL_NAME_APP, TEST_RESOURCE_LABEL_VALUE_APP);
 
     private static final String TEST_CONFIGMAP_NAME = "test-configmap";
     private static final String TEST_DEPLOYMENT_NAME = "test-deployment";
@@ -57,19 +55,25 @@ public class BasicOpenShiftTest {
         openShiftClient.createResources(configMap);
         // assert
         List<ConfigMap> actualConfigMaps = openShiftClient.getConfigMaps();
-        Assert.assertEquals(String.format("ConfigMap resource list has unexpected size: %d.",
-                actualConfigMaps.size()), 1, actualConfigMaps.size());
+        Assert.assertEquals(
+                String.format("ConfigMap resource list has unexpected size: %d.", actualConfigMaps.size()),
+                1,
+                actualConfigMaps.size());
         ConfigMap actualConfigMap = openShiftClient.getConfigMap(TEST_CONFIGMAP_NAME);
         Assert.assertNotNull("ConfigMap resource creation failed.", actualConfigMap);
-        Assert.assertEquals("ConfigMap resource has unexpected name.",
+        Assert.assertEquals(
+                "ConfigMap resource has unexpected name.",
                 TEST_CONFIGMAP_NAME,
                 actualConfigMap.getMetadata().getName());
         Assert.assertEquals(
-                String.format("ConfigMap resource has unexpected data size: %d", actualConfigMap.getData().entrySet().size()),
+                String.format(
+                        "ConfigMap resource has unexpected data size: %d",
+                        actualConfigMap.getData().entrySet().size()),
                 1,
                 actualConfigMap.getData().entrySet().size());
         // safe now
-        final Map.Entry<String, String> dataEntry = actualConfigMap.getData().entrySet().stream().findFirst().get();
+        final Map.Entry<String, String> dataEntry =
+                actualConfigMap.getData().entrySet().stream().findFirst().get();
         Assert.assertEquals(
                 String.format("ConfigMap resource has unexpected data entry key: %s", dataEntry.getKey()),
                 dataEntryKey,
@@ -92,38 +96,50 @@ public class BasicOpenShiftTest {
         // act
         openShiftClient.createResources(deploymentConfig);
         // assert
-        List<DeploymentConfig> actualResources = openShiftClient.deploymentConfigs()
+        List<DeploymentConfig> actualResources = openShiftClient
+                .deploymentConfigs()
                 .withLabel(TEST_RESOURCE_LABEL_NAME_APP, TEST_RESOURCE_LABEL_VALUE_APP)
                 .list()
                 .getItems();
         Assert.assertEquals(
                 String.format("DeploymentConfig resource list has unexpected size: %d.", actualResources.size()),
-                1, actualResources.size());
+                1,
+                actualResources.size());
         DeploymentConfig actualResource = actualResources.get(0);
         Assert.assertEquals(
-                String.format("DeploymentConfig resource has unexpected name: %s.", actualResource.getMetadata().getName()),
-                TEST_DEPLOYMENT_CONFIG_NAME, actualResource.getMetadata().getName());
+                String.format(
+                        "DeploymentConfig resource has unexpected name: %s.",
+                        actualResource.getMetadata().getName()),
+                TEST_DEPLOYMENT_CONFIG_NAME,
+                actualResource.getMetadata().getName());
         Assert.assertNotNull(String.format("DeploymentConfig resource has null \".spec\"", actualResource.getSpec()));
         Assert.assertEquals(
-                String.format("DeploymentConfig resource has unexpected \".spec.replicas\": %s.",
+                String.format(
+                        "DeploymentConfig resource has unexpected \".spec.replicas\": %s.",
                         actualResource.getSpec().getReplicas()),
                 TEST_DEPLOYMENT_CONFIG_REPLICAS,
                 actualResource.getSpec().getReplicas());
-        Assert.assertNotNull(
-                String.format("DeploymentConfig resource has null \".spec.strategy\"", actualResource.getSpec().getStrategy()));
+        Assert.assertNotNull(String.format(
+                "DeploymentConfig resource has null \".spec.strategy\"",
+                actualResource.getSpec().getStrategy()));
         Assert.assertEquals(
-                String.format("DeploymentConfig resource has unexpected \".spec.strategy\": %s.",
+                String.format(
+                        "DeploymentConfig resource has unexpected \".spec.strategy\": %s.",
                         actualResource.getSpec().getStrategy().getType()),
                 "Recreate",
                 actualResource.getSpec().getStrategy().getType());
-        Assert.assertNotNull(
-                String.format("DeploymentConfig resource has null \".spec.template\"", actualResource.getSpec().getTemplate()));
-        Assert.assertNotNull(String.format("DeploymentConfig resource has null \".spec.template.spec\"",
+        Assert.assertNotNull(String.format(
+                "DeploymentConfig resource has null \".spec.template\"",
+                actualResource.getSpec().getTemplate()));
+        Assert.assertNotNull(String.format(
+                "DeploymentConfig resource has null \".spec.template.spec\"",
                 actualResource.getSpec().getTemplate().getSpec()));
         PodSpec podSpec = actualResource.getSpec().getTemplate().getSpec();
         Assert.assertEquals(
-                String.format("DeploymentConfig resource has unexpected \".spec.template.spec.containers\": %s.",
+                String.format(
+                        "DeploymentConfig resource has unexpected \".spec.template.spec.containers\": %s.",
                         podSpec.getContainers().size()),
-                0, podSpec.getContainers().size());
+                0,
+                podSpec.getContainers().size());
     }
 }

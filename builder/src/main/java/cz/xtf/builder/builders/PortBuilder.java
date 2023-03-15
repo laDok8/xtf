@@ -1,12 +1,10 @@
 package cz.xtf.builder.builders;
 
-import java.util.Random;
-
-import org.apache.commons.lang3.StringUtils;
-
 import cz.xtf.builder.builders.route.TransportProtocol;
 import io.fabric8.kubernetes.api.model.ServicePort;
 import io.fabric8.kubernetes.api.model.ServicePortBuilder;
+import java.util.Random;
+import org.apache.commons.lang3.StringUtils;
 
 public class PortBuilder extends AbstractBuilder<ServicePort, PortBuilder> {
     private TransportProtocol protocol = TransportProtocol.TCP;
@@ -54,9 +52,7 @@ public class PortBuilder extends AbstractBuilder<ServicePort, PortBuilder> {
         if (StringUtils.isNotBlank(getName())) {
             servicePort.withName(getName());
         }
-        servicePort.withProtocol(protocol.uppercase())
-                .withPort(port)
-                .withNewTargetPort(targetPort);
+        servicePort.withProtocol(protocol.uppercase()).withPort(port).withNewTargetPort(targetPort);
         return servicePort.build();
     }
 

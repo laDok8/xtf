@@ -1,10 +1,9 @@
 package cz.xtf.builder.builders;
 
+import io.fabric8.kubernetes.api.model.rbac.Role;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-
-import io.fabric8.kubernetes.api.model.rbac.Role;
 
 /**
  * Definition of Role. Example:

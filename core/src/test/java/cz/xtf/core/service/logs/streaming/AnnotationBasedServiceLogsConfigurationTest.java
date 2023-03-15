@@ -9,22 +9,17 @@ import org.junit.jupiter.api.Test;
  */
 public class AnnotationBasedServiceLogsConfigurationTest {
 
-    private static final AnnotationBasedServiceLogsConfigurations CONFIGURATIONS = new AnnotationBasedServiceLogsConfigurations();
+    private static final AnnotationBasedServiceLogsConfigurations CONFIGURATIONS =
+            new AnnotationBasedServiceLogsConfigurations();
 
     @ServiceLogsStreaming(filter = ".*all-colors", output = "/home/myuser/sls.log")
-    static class ColorsTestClass {
-        ; // we don't need anything in here
-    }
+    static class ColorsTestClass {}
 
     @ServiceLogsStreaming
-    static class AnimalsTestClass {
-        ; // we don't need anything in here
-    }
+    static class AnimalsTestClass {}
 
     @ServiceLogsStreaming
-    static class CarsTestClass {
-        ; // we don't need anything in here
-    }
+    static class CarsTestClass {}
 
     /**
      * Check that the expected configuration exists, based on the test class {@link ServiceLogsStreaming} annotation.
@@ -34,7 +29,8 @@ public class AnnotationBasedServiceLogsConfigurationTest {
         // ColorsTestClass - check by retrieving the one based on per-class criteria
         ServiceLogsConfigurationTestHelper.verifyPerClassConfigurationSearchExists(
                 CONFIGURATIONS.forClass(ColorsTestClass.class), ColorsTestClass.class);
-        // AnnotationBasedServiceLogsConfigurationTest - check by retrieving the one based on per-class criteria (negative)
+        // AnnotationBasedServiceLogsConfigurationTest - check by retrieving the one based on per-class criteria
+        // (negative)
         ServiceLogsConfigurationTestHelper.verifyPerClassConfigurationSearchDoesNotExist(
                 CONFIGURATIONS.forClass(AnnotationBasedServiceLogsConfigurationTest.class),
                 AnnotationBasedServiceLogsConfigurationTest.class);
@@ -54,15 +50,21 @@ public class AnnotationBasedServiceLogsConfigurationTest {
     public void testSlsConfigurationAttributesAreProperlyMapped() {
         // TestClassA
         ServiceLogsSettings configuration = CONFIGURATIONS.forClass(ColorsTestClass.class);
-        Assertions.assertEquals(ColorsTestClass.class.getName(), configuration.getTarget(),
+        Assertions.assertEquals(
+                ColorsTestClass.class.getName(),
+                configuration.getTarget(),
                 String.format(
                         "SLS configuration \"target\" attribute (%s) hasn't the expected value (%s)",
                         configuration.getTarget(), ColorsTestClass.class.getName()));
-        Assertions.assertEquals(".*all-colors", configuration.getFilter(),
+        Assertions.assertEquals(
+                ".*all-colors",
+                configuration.getFilter(),
                 String.format(
                         "SLS configuration \"filter\" attribute (%s) hasn't the expected value (%s)",
                         configuration.getFilter(), ".*all-colors"));
-        Assertions.assertEquals("/home/myuser/sls.log", configuration.getOutputPath(),
+        Assertions.assertEquals(
+                "/home/myuser/sls.log",
+                configuration.getOutputPath(),
                 String.format(
                         "SLS configuration \"output\" attribute (%s) hasn't the expected value (%s)",
                         configuration.getOutputPath(), "/home/myuser/sls.log"));

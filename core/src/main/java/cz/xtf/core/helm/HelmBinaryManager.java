@@ -24,8 +24,8 @@ class HelmBinaryManager {
     }
 
     private static HelmBinary getBinary(String token, String username, String namespace) {
-        String helmBinaryPath = HelmBinaryManagerFactory.INSTANCE.getHelmBinaryManager().getHelmBinaryPath();
+        String helmBinaryPath =
+                HelmBinaryManagerFactory.INSTANCE.getHelmBinaryManager().getHelmBinaryPath();
         return new HelmBinary(helmBinaryPath, username, token, namespace);
-
     }
 }

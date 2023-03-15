@@ -1,15 +1,5 @@
 package cz.xtf.builder.builders;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import cz.xtf.builder.OpenShiftApplication;
 import cz.xtf.builder.db.OpenShiftAuxiliary;
 import cz.xtf.core.bm.ManagedBuildReference;
@@ -25,6 +15,15 @@ import io.fabric8.openshift.api.model.BuildConfig;
 import io.fabric8.openshift.api.model.DeploymentConfig;
 import io.fabric8.openshift.api.model.ImageStream;
 import io.fabric8.openshift.api.model.Route;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -36,7 +35,12 @@ public class ApplicationBuilder {
 
     public static ApplicationBuilder fromImage(String name, String imageUrl, Map<String, String> labels) {
         ApplicationBuilder appBuilder = new ApplicationBuilder(name, labels);
-        appBuilder.deploymentConfig().onConfigurationChange().podTemplate().container().fromImage(imageUrl);
+        appBuilder
+                .deploymentConfig()
+                .onConfigurationChange()
+                .podTemplate()
+                .container()
+                .fromImage(imageUrl);
 
         return appBuilder;
     }
@@ -45,9 +49,15 @@ public class ApplicationBuilder {
         return fromManagedBuild(name, mbr, Collections.EMPTY_MAP);
     }
 
-    public static ApplicationBuilder fromManagedBuild(String name, ManagedBuildReference mbr, Map<String, String> labels) {
+    public static ApplicationBuilder fromManagedBuild(
+            String name, ManagedBuildReference mbr, Map<String, String> labels) {
         ApplicationBuilder appBuilder = new ApplicationBuilder(name, labels);
-        appBuilder.deploymentConfig().onImageChange().onConfigurationChange().podTemplate().container()
+        appBuilder
+                .deploymentConfig()
+                .onImageChange()
+                .onConfigurationChange()
+                .podTemplate()
+                .container()
                 .fromImage(mbr.getNamespace(), mbr.getStreamName());
 
         return appBuilder;
@@ -57,12 +67,25 @@ public class ApplicationBuilder {
         return fromS2IBuild(name, imageUrl, gitRepo, Collections.EMPTY_MAP);
     }
 
-    public static ApplicationBuilder fromS2IBuild(String name, String imageUrl, String gitRepo, Map<String, String> labels) {
+    public static ApplicationBuilder fromS2IBuild(
+            String name, String imageUrl, String gitRepo, Map<String, String> labels) {
         ApplicationBuilder appBuilder = new ApplicationBuilder(name, labels);
-        appBuilder.buildConfig().onConfigurationChange().gitSource(gitRepo).setOutput(name).sti().forcePull(true)
+        appBuilder
+                .buildConfig()
+                .onConfigurationChange()
+                .gitSource(gitRepo)
+                .setOutput(name)
+                .sti()
+                .forcePull(true)
                 .fromDockerImage(imageUrl);
         appBuilder.imageStream();
-        appBuilder.deploymentConfig().onImageChange().onConfigurationChange().podTemplate().container().fromImage(name);
+        appBuilder
+                .deploymentConfig()
+                .onImageChange()
+                .onConfigurationChange()
+                .podTemplate()
+                .container()
+                .fromImage(name);
 
         return appBuilder;
     }
@@ -100,7 +123,8 @@ public class ApplicationBuilder {
 
     public ImageStreamBuilder imageStream(String name) {
         ImageStreamBuilder builder;
-        Optional<ImageStreamBuilder> orig = images.stream().filter(b -> b.getName().equals(name)).findFirst();
+        Optional<ImageStreamBuilder> orig =
+                images.stream().filter(b -> b.getName().equals(name)).findFirst();
         if (orig.isPresent()) {
             builder = orig.get();
         } else {
@@ -118,7 +142,8 @@ public class ApplicationBuilder {
 
     public BuildConfigBuilder buildConfig(String name) {
         BuildConfigBuilder builder;
-        Optional<BuildConfigBuilder> orig = builds.stream().filter(b -> b.getName().equals(name)).findFirst();
+        Optional<BuildConfigBuilder> orig =
+                builds.stream().filter(b -> b.getName().equals(name)).findFirst();
         if (orig.isPresent()) {
             builder = orig.get();
         } else {
@@ -136,7 +161,8 @@ public class ApplicationBuilder {
 
     public DeploymentConfigBuilder deploymentConfig(String name) {
         DeploymentConfigBuilder builder;
-        Optional<DeploymentConfigBuilder> orig = deployments.stream().filter(b -> b.getName().equals(name)).findFirst();
+        Optional<DeploymentConfigBuilder> orig =
+                deployments.stream().filter(b -> b.getName().equals(name)).findFirst();
         if (orig.isPresent()) {
             builder = orig.get();
         } else {
@@ -154,7 +180,8 @@ public class ApplicationBuilder {
 
     public ServiceBuilder service(String name) {
         ServiceBuilder result;
-        Optional<ServiceBuilder> orig = services.stream().filter(b -> b.getName().equals(name)).findFirst();
+        Optional<ServiceBuilder> orig =
+                services.stream().filter(b -> b.getName().equals(name)).findFirst();
         if (orig.isPresent()) {
             result = orig.get();
         } else {
@@ -173,7 +200,8 @@ public class ApplicationBuilder {
 
     public RouteBuilder route(String name) {
         RouteBuilder result;
-        Optional<RouteBuilder> orig = routes.stream().filter(r -> r.getName().startsWith(name)).findFirst();
+        Optional<RouteBuilder> orig =
+                routes.stream().filter(r -> r.getName().startsWith(name)).findFirst();
         if (orig.isPresent()) {
             result = orig.get();
         } else {
@@ -192,7 +220,8 @@ public class ApplicationBuilder {
 
     public RoleBuilder role(String name) {
         RoleBuilder result;
-        Optional<RoleBuilder> orig = roles.stream().filter(r -> r.getName().startsWith(name)).findFirst();
+        Optional<RoleBuilder> orig =
+                roles.stream().filter(r -> r.getName().startsWith(name)).findFirst();
         if (orig.isPresent()) {
             result = orig.get();
         } else {
@@ -210,7 +239,8 @@ public class ApplicationBuilder {
 
     public RoleBindingBuilder roleBinding(String name) {
         RoleBindingBuilder result;
-        Optional<RoleBindingBuilder> orig = roleBindings.stream().filter(r -> r.getName().startsWith(name)).findFirst();
+        Optional<RoleBindingBuilder> orig =
+                roleBindings.stream().filter(r -> r.getName().startsWith(name)).findFirst();
         if (orig.isPresent()) {
             result = orig.get();
         } else {
@@ -228,8 +258,8 @@ public class ApplicationBuilder {
 
     public ConfigMapWithPropertyFilesBuilder configMap(String name) {
         ConfigMapWithPropertyFilesBuilder result;
-        Optional<ConfigMapWithPropertyFilesBuilder> orig = configMaps.stream().filter(r -> r.getName().equals(name))
-                .findFirst();
+        Optional<ConfigMapWithPropertyFilesBuilder> orig =
+                configMaps.stream().filter(r -> r.getName().equals(name)).findFirst();
         if (orig.isPresent()) {
             result = orig.get();
         } else {
@@ -246,7 +276,8 @@ public class ApplicationBuilder {
 
     public SecretBuilder secret(String name) {
         SecretBuilder result;
-        Optional<SecretBuilder> orig = secrets.stream().filter(r -> r.getName().equals(name)).findFirst();
+        Optional<SecretBuilder> orig =
+                secrets.stream().filter(r -> r.getName().equals(name)).findFirst();
         if (orig.isPresent()) {
             result = orig.get();
         } else {
@@ -263,7 +294,9 @@ public class ApplicationBuilder {
 
     public PVCBuilder pvc(String name) {
         PVCBuilder result;
-        Optional<PVCBuilder> orig = persistentVolumeClaims.stream().filter(r -> r.getName().equals(name)).findFirst();
+        Optional<PVCBuilder> orig = persistentVolumeClaims.stream()
+                .filter(r -> r.getName().equals(name))
+                .findFirst();
         if (orig.isPresent()) {
             result = orig.get();
         } else {

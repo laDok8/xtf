@@ -1,11 +1,9 @@
 package cz.xtf.core.openshift;
 
 import java.util.List;
-
-import org.apache.commons.lang3.ArrayUtils;
-
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ArrayUtils;
 
 @Slf4j
 public class OpenShiftBinary {
@@ -34,7 +32,7 @@ public class OpenShiftBinary {
     /**
      * Apply configuration file in the specified namespace.
      * Delegates to `oc apply --filename='sourcepath' --namespace='namespace'`
-     * 
+     *
      * @param sourcePath path to configration file
      * @param namespace namespace
      */
@@ -44,7 +42,7 @@ public class OpenShiftBinary {
 
     /**
      * Apply configuration file. Delegates to `oc apply --filename='sourcepath`
-     * 
+     *
      * @param sourcePath path to configration file
      */
     public void apply(String sourcePath) {
@@ -53,7 +51,7 @@ public class OpenShiftBinary {
 
     /**
      * Apply configuration files in the order they appear in the list
-     * 
+     *
      * @param sourcePaths list of paths to configuration files
      */
     public void apply(List<String> sourcePaths) {
@@ -64,7 +62,7 @@ public class OpenShiftBinary {
 
     /**
      * Apply configuration files in the order they appear in the list, using supplied namespace.
-     * 
+     *
      * @param namespace namespace in which the configuration files should be applied
      * @param sourcePaths list of paths to configuration files
      */
@@ -85,9 +83,10 @@ public class OpenShiftBinary {
     // Common method for any oc command call
     public String execute(String... args) {
         if (ocConfigPath == null) {
-            return CLIUtils.executeCommand(ArrayUtils.addAll(new String[] { path }, args));
+            return CLIUtils.executeCommand(ArrayUtils.addAll(new String[] {path}, args));
         } else {
-            return CLIUtils.executeCommand(ArrayUtils.addAll(new String[] { path, "--kubeconfig=" + ocConfigPath }, args));
+            return CLIUtils.executeCommand(
+                    ArrayUtils.addAll(new String[] {path, "--kubeconfig=" + ocConfigPath}, args));
         }
     }
 }

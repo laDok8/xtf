@@ -7,5 +7,5 @@ public abstract class DefaultAuxiliary implements OpenShiftAuxiliary {
         this.symbolicName = symbolicName;
     }
 
-    abstract public String getDeploymentConfigName();
+    public abstract String getDeploymentConfigName();
 }

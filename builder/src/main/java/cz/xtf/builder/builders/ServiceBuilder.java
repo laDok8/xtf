@@ -1,15 +1,14 @@
 package cz.xtf.builder.builders;
 
+import cz.xtf.builder.builders.route.TransportProtocol;
+import io.fabric8.kubernetes.api.model.Service;
+import io.fabric8.kubernetes.api.model.ServicePortBuilder;
+import io.fabric8.kubernetes.api.model.ServiceSpecBuilder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import cz.xtf.builder.builders.route.TransportProtocol;
-import io.fabric8.kubernetes.api.model.Service;
-import io.fabric8.kubernetes.api.model.ServicePortBuilder;
-import io.fabric8.kubernetes.api.model.ServiceSpecBuilder;
 import lombok.Getter;
 
 public class ServiceBuilder extends AbstractBuilder<Service, ServiceBuilder> {
@@ -97,7 +96,8 @@ public class ServiceBuilder extends AbstractBuilder<Service, ServiceBuilder> {
                 .withName(sp.getName())
                 .withProtocol(sp.getTransportProtocol().uppercase())
                 .withPort(sp.getPort())
-                .withNewTargetPort(sp.getTargetPort()).build()));
+                .withNewTargetPort(sp.getTargetPort())
+                .build()));
 
         spec.withSessionAffinity(sessionAffinity.toString());
 

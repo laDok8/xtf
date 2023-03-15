@@ -11,5 +11,4 @@ public class ConfiguredPathHelmBinaryResolverTest {
     public void resolveTest() {
         Assertions.assertEquals("/tmp/helm", configuredPathHelmBinaryResolver.resolve());
     }
-
 }

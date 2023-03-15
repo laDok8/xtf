@@ -12,7 +12,6 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
-
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -23,11 +22,9 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-
+import lombok.extern.slf4j.Slf4j;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
-import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 class TestResultWriter {
@@ -143,8 +140,8 @@ class TestResultWriter {
         testsuite.setAttribute("failures", Integer.toString(failures.get()));
         testsuite.setAttribute("time", computeTestTime(suiteStartTime.get()));
 
-        try (Writer writer = Files.newBufferedWriter(reportPath, StandardCharsets.UTF_8,
-                StandardOpenOption.TRUNCATE_EXISTING)) {
+        try (Writer writer =
+                Files.newBufferedWriter(reportPath, StandardCharsets.UTF_8, StandardOpenOption.TRUNCATE_EXISTING)) {
             Transformer t = TransformerFactory.newInstance().newTransformer();
             t.setOutputProperty(OutputKeys.INDENT, "yes");
             t.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");

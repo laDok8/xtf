@@ -1,12 +1,11 @@
 package cz.xtf.builder.builders;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import io.fabric8.kubernetes.api.model.ObjectReferenceBuilder;
 import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.api.model.ServiceAccount;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class ServiceAccountBuilder extends AbstractBuilder<ServiceAccount, ServiceAccountBuilder> {
     private final List<String> secrets = new LinkedList<>();
@@ -33,9 +32,10 @@ public class ServiceAccountBuilder extends AbstractBuilder<ServiceAccount, Servi
     public ServiceAccount build() {
         return new io.fabric8.kubernetes.api.model.ServiceAccountBuilder()
                 .withMetadata(metadataBuilder().build())
-                .withSecrets(secrets.stream().map(secret -> new ObjectReferenceBuilder()
-                        .withName(secret)
-                        .build()).collect(Collectors.toList()))
+                .withSecrets(secrets.stream()
+                        .map(secret ->
+                                new ObjectReferenceBuilder().withName(secret).build())
+                        .collect(Collectors.toList()))
                 .build();
     }
 
@@ -43,5 +43,4 @@ public class ServiceAccountBuilder extends AbstractBuilder<ServiceAccount, Servi
     protected ServiceAccountBuilder getThis() {
         return this;
     }
-
 }

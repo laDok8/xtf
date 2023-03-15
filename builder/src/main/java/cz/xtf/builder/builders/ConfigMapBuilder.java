@@ -1,11 +1,10 @@
 package cz.xtf.builder.builders;
 
+import io.fabric8.kubernetes.api.model.ConfigMap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
-import io.fabric8.kubernetes.api.model.ConfigMap;
 
 public class ConfigMapBuilder extends AbstractBuilder<ConfigMap, ConfigMapBuilder> implements EnvironmentConfiguration {
     private final Map<String, String> config = new HashMap<>();
@@ -20,7 +19,8 @@ public class ConfigMapBuilder extends AbstractBuilder<ConfigMap, ConfigMapBuilde
         return new io.fabric8.kubernetes.api.model.ConfigMapBuilder()
                 .withMetadata(metadataBuilder().build())
                 .withData(config.entrySet().stream()
-                        .collect(Collectors.toMap(x -> nameTransformationFunction.apply(x.getKey()), Map.Entry::getValue)))
+                        .collect(Collectors.toMap(
+                                x -> nameTransformationFunction.apply(x.getKey()), Map.Entry::getValue)))
                 .build();
     }
 

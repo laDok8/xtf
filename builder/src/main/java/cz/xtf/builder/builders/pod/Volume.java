@@ -1,8 +1,7 @@
 package cz.xtf.builder.builders.pod;
 
-import org.apache.commons.lang3.StringUtils;
-
 import io.fabric8.kubernetes.api.model.VolumeBuilder;
+import org.apache.commons.lang3.StringUtils;
 
 public abstract class Volume {
     private final String name;
@@ -19,8 +18,7 @@ public abstract class Volume {
     }
 
     public final io.fabric8.kubernetes.api.model.Volume build() {
-        VolumeBuilder builder = new VolumeBuilder()
-                .withName(name);
+        VolumeBuilder builder = new VolumeBuilder().withName(name);
 
         addVolumeParameters(builder);
 
@@ -31,10 +29,8 @@ public abstract class Volume {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o)
-            return true;
-        if (!(o instanceof Volume))
-            return false;
+        if (this == o) return true;
+        if (!(o instanceof Volume)) return false;
 
         Volume volume = (Volume) o;
 

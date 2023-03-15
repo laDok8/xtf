@@ -1,17 +1,15 @@
 package cz.xtf.core.openshift;
 
+import cz.xtf.core.config.OpenShiftConfig;
+import cz.xtf.core.config.XTFConfig;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-
-import cz.xtf.core.config.OpenShiftConfig;
-import cz.xtf.core.config.XTFConfig;
 import uk.org.webcompere.systemstubs.jupiter.SystemStub;
 import uk.org.webcompere.systemstubs.jupiter.SystemStubsExtension;
 import uk.org.webcompere.systemstubs.properties.SystemProperties;
@@ -29,8 +27,10 @@ public class ClusterVersionOpenShiftBinaryPathResolverTest {
         final String ocpVersion = "4.8.14";
         setOCPVersion(ocpVersion);
         final String systemType = SystemUtils.IS_OS_MAC ? "mac" : "linux";
-        testDownloadedVersion("https://mirror.openshift.com/pub/openshift-v4/amd64/clients/ocp/" + ocpVersion
-                + "/openshift-client-" + systemType + ".tar.gz", ocpVersion);
+        testDownloadedVersion(
+                "https://mirror.openshift.com/pub/openshift-v4/amd64/clients/ocp/" + ocpVersion + "/openshift-client-"
+                        + systemType + ".tar.gz",
+                ocpVersion);
     }
 
     @Test
@@ -52,7 +52,9 @@ public class ClusterVersionOpenShiftBinaryPathResolverTest {
 
         // path is correct and binary file exists
         Path ocPath = Paths.get("tmp/oc/oc");
-        softAssertions.assertThat(resolvedPath).isEqualTo(ocPath.toAbsolutePath().toString());
+        softAssertions
+                .assertThat(resolvedPath)
+                .isEqualTo(ocPath.toAbsolutePath().toString());
         softAssertions.assertThat(Files.exists((ocPath))).isTrue();
 
         // archive is in cache

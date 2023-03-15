@@ -1,9 +1,8 @@
 package cz.xtf.junit5.extensions;
 
+import cz.xtf.core.openshift.OpenShifts;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
-
-import cz.xtf.core.openshift.OpenShifts;
 
 public class CleanBeforeAllCallback implements BeforeAllCallback {
 

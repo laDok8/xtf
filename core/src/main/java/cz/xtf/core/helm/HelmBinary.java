@@ -1,17 +1,15 @@
 package cz.xtf.core.helm;
 
+import cz.xtf.core.config.OpenShiftConfig;
+import cz.xtf.core.openshift.CLIUtils;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
-
-import org.apache.commons.lang3.ArrayUtils;
-
-import cz.xtf.core.config.OpenShiftConfig;
-import cz.xtf.core.openshift.CLIUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ArrayUtils;
 
 @Slf4j
 public class HelmBinary {
@@ -52,7 +50,6 @@ public class HelmBinary {
         environmentVariables.put("HELM_KUBETOKEN", kubeToken);
         environmentVariables.put("HELM_NAMESPACE", namespace);
         environmentVariables.put("HELM_KUBEINSECURE_SKIP_TLS_VERIFY", "true");
-        return CLIUtils.executeCommand(environmentVariables, ArrayUtils.addAll(new String[] { path }, args));
+        return CLIUtils.executeCommand(environmentVariables, ArrayUtils.addAll(new String[] {path}, args));
     }
-
 }

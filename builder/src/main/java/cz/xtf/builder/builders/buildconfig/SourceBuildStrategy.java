@@ -1,15 +1,13 @@
 package cz.xtf.builder.builders.buildconfig;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import org.apache.commons.lang3.StringUtils;
-
 import cz.xtf.builder.builders.BuildConfigBuilder;
 import io.fabric8.kubernetes.api.model.EnvVar;
 import io.fabric8.openshift.api.model.BuildStrategyBuilder;
 import io.fabric8.openshift.api.model.SourceBuildStrategyBuilder;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
+import org.apache.commons.lang3.StringUtils;
 
 public class SourceBuildStrategy extends BuildStrategy {
     private final Map<String, String> env = new HashMap<>();
@@ -74,12 +72,14 @@ public class SourceBuildStrategy extends BuildStrategy {
         // source image
         if (StringUtils.isNotBlank(imageStreamName)) {
             if (StringUtils.isNotBlank(imageStreamTag)) {
-                strategyBuilder.withNewFrom()
+                strategyBuilder
+                        .withNewFrom()
                         .withKind("ImageStreamTag")
                         .withName(imageStreamName + ":" + imageStreamTag)
                         .endFrom();
             } else {
-                strategyBuilder.withNewFrom()
+                strategyBuilder
+                        .withNewFrom()
                         .withKind("ImageStream")
                         .withName(imageStreamName)
                         .endFrom();
@@ -88,7 +88,8 @@ public class SourceBuildStrategy extends BuildStrategy {
                 strategyBuilder.getFrom().setNamespace(imageStreamNamespace);
             }
         } else if (StringUtils.isNotBlank(dockerImageUrl)) {
-            strategyBuilder.withNewFrom()
+            strategyBuilder
+                    .withNewFrom()
                     .withKind("DockerImage")
                     .withName(dockerImageUrl)
                     .endFrom();
@@ -106,9 +107,9 @@ public class SourceBuildStrategy extends BuildStrategy {
         strategyBuilder.withIncremental(incremental);
 
         // build environment
-        strategyBuilder.withEnv(
-                env.entrySet().stream().map(entry -> new EnvVar(entry.getKey(), entry.getValue(), null))
-                        .collect(Collectors.toList()));
+        strategyBuilder.withEnv(env.entrySet().stream()
+                .map(entry -> new EnvVar(entry.getKey(), entry.getValue(), null))
+                .collect(Collectors.toList()));
 
         builder.withSourceStrategy(strategyBuilder.build());
     }

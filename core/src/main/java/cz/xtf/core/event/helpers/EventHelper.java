@@ -1,16 +1,15 @@
 package cz.xtf.core.event.helpers;
 
+import cz.xtf.core.bm.BuildManagers;
+import cz.xtf.core.openshift.OpenShift;
+import cz.xtf.core.openshift.OpenShifts;
+import io.fabric8.kubernetes.api.model.Event;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import cz.xtf.core.bm.BuildManagers;
-import cz.xtf.core.openshift.OpenShift;
-import cz.xtf.core.openshift.OpenShifts;
-import io.fabric8.kubernetes.api.model.Event;
 
 public class EventHelper {
     public static ZonedDateTime timestampToZonedDateTime(String timestamp) {
@@ -22,7 +21,9 @@ public class EventHelper {
         if (zonedDateTime == null) {
             zonedDateTime = timeOfLastEvent(BuildManagers.get().openShift());
         }
-        return zonedDateTime != null ? zonedDateTime : ZonedDateTime.ofInstant(Instant.ofEpochSecond(0), ZoneOffset.UTC);
+        return zonedDateTime != null
+                ? zonedDateTime
+                : ZonedDateTime.ofInstant(Instant.ofEpochSecond(0), ZoneOffset.UTC);
     }
 
     public static ZonedDateTime timeOfLastEvent(OpenShift openShift) {
@@ -38,6 +39,7 @@ public class EventHelper {
             ZonedDateTime o2Date = EventHelper.timestampToZonedDateTime(o2.getLastTimestamp());
             return o1Date.compareTo(o2Date);
         });
-        return EventHelper.timestampToZonedDateTime(eventList.get(eventList.size() - 1).getLastTimestamp());
+        return EventHelper.timestampToZonedDateTime(
+                eventList.get(eventList.size() - 1).getLastTimestamp());
     }
 }

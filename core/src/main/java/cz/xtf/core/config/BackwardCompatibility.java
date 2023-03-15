@@ -79,8 +79,8 @@ class BackwardCompatibility {
         String configRouteDomain = XTFConfig.get("xtf.config.route_domain");
         String systemEnvDomain = System.getenv().get("DOMAIN");
 
-        return configDomain != null ? "apps." + configDomain
+        return configDomain != null
+                ? "apps." + configDomain
                 : (systemEnvDomain != null ? "apps." + systemEnvDomain : configRouteDomain);
-
     }
 }

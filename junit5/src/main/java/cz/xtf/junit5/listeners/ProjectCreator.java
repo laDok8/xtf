@@ -1,7 +1,12 @@
 package cz.xtf.junit5.listeners;
 
+import cz.xtf.core.config.OpenShiftConfig;
+import cz.xtf.core.context.TestCaseContext;
+import cz.xtf.core.namespace.NamespaceManager;
+import cz.xtf.core.openshift.OpenShifts;
+import cz.xtf.junit5.config.JUnitConfig;
 import java.util.Arrays;
-
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
@@ -13,16 +18,8 @@ import org.junit.platform.launcher.PostDiscoveryFilter;
 import org.junit.platform.launcher.TestExecutionListener;
 import org.junit.platform.launcher.TestPlan;
 
-import cz.xtf.core.config.OpenShiftConfig;
-import cz.xtf.core.context.TestCaseContext;
-import cz.xtf.core.namespace.NamespaceManager;
-import cz.xtf.core.openshift.OpenShifts;
-import cz.xtf.junit5.config.JUnitConfig;
-import lombok.extern.slf4j.Slf4j;
-
 @Slf4j
-public class ProjectCreator
-        implements TestExecutionListener, BeforeAllCallback, AfterAllCallback, PostDiscoveryFilter {
+public class ProjectCreator implements TestExecutionListener, BeforeAllCallback, AfterAllCallback, PostDiscoveryFilter {
 
     @Override
     public void testPlanExecutionStarted(TestPlan testPlan) {
@@ -62,8 +59,12 @@ public class ProjectCreator
     @Override
     public FilterResult apply(TestDescriptor testDescriptor) {
         if (testDescriptor instanceof MethodBasedTestDescriptor) {
-            boolean disabled = Arrays.stream(((MethodBasedTestDescriptor) testDescriptor).getTestClass().getAnnotations())
-                    .filter(annotation -> annotation instanceof Disabled).count() > 0;
+            boolean disabled = Arrays.stream(((MethodBasedTestDescriptor) testDescriptor)
+                                    .getTestClass()
+                                    .getAnnotations())
+                            .filter(annotation -> annotation instanceof Disabled)
+                            .count()
+                    > 0;
             if (!disabled) {
                 NamespaceManager.addTestCaseToNamespaceEntryIfAbsent(testDescriptor);
             }

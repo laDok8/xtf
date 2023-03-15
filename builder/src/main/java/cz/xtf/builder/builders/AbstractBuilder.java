@@ -1,11 +1,9 @@
 package cz.xtf.builder.builders;
 
+import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import java.util.HashMap;
 import java.util.Map;
-
 import org.apache.commons.lang3.StringUtils;
-
-import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 
 public abstract class AbstractBuilder<T, R extends AbstractBuilder> {
     private final String name;
@@ -56,15 +54,12 @@ public abstract class AbstractBuilder<T, R extends AbstractBuilder> {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o)
-            return true;
-        if (!(o.getClass() == getClass()))
-            return false;
+        if (this == o) return true;
+        if (!(o.getClass() == getClass())) return false;
 
         AbstractBuilder<?, ?> that = (AbstractBuilder<?, ?>) o;
 
         return name.equals(that.name);
-
     }
 
     @Override

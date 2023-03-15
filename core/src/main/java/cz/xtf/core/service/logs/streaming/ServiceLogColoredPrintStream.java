@@ -9,7 +9,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,7 +37,7 @@ public class ServiceLogColoredPrintStream extends PrintStream {
      * If we have e.g.: "AAAA\nBBBB", we would have 3 tokens: "AAAA","\n","BBBB";
      * Note that a buffer not containing any new line is considered a single token e.g. buffer "AAAA" is considered as
      * the single token "AAAA"
-     * 
+     *
      * @param buf the data.
      * @param off the start offset in the data.
      * @param len the number of bytes to write.
@@ -59,11 +58,9 @@ public class ServiceLogColoredPrintStream extends PrintStream {
                     baos.write(buf[i]);
                 }
             }
-            if (baos.size() > 0)
-                tokens.add(baos.toByteArray());
+            if (baos.size() > 0) tokens.add(baos.toByteArray());
         }
-        if (tokens.isEmpty())
-            tokens.add(Arrays.copyOfRange(buf, off, len));
+        if (tokens.isEmpty()) tokens.add(Arrays.copyOfRange(buf, off, len));
         return tokens;
     }
 
@@ -75,7 +72,7 @@ public class ServiceLogColoredPrintStream extends PrintStream {
      * Prints the line header which usually consists of the name of the container the log comes from, preceded by the
      * name of the pod and the name of the namespace where the container is running, with properly colored background
      * and foreground
-     * 
+     *
      * @throws IOException in case something goes wrong while writing to the underlying stream
      */
     private void printLineHeader() throws IOException {
@@ -92,7 +89,7 @@ public class ServiceLogColoredPrintStream extends PrintStream {
 
     /**
      * Prints a token of the log line with properly colored background and foreground
-     * 
+     *
      * @param buf the data.
      * @param off the start offset in the data.
      * @param len the number of bytes to write.
@@ -112,12 +109,12 @@ public class ServiceLogColoredPrintStream extends PrintStream {
 
     @Override
     public void write(int b) {
-        write(new byte[] { (byte) b }, 0, 1);
+        write(new byte[] {(byte) b}, 0, 1);
     }
 
     /**
      * Prints the data with properly colored background and foreground; takes care of adding a line header to each line
-     * 
+     *
      * @param buf the data.
      * @param off the start offset in the data.
      * @param len the number of bytes to write.
@@ -126,8 +123,7 @@ public class ServiceLogColoredPrintStream extends PrintStream {
     public void write(byte buf[], int off, int len) {
         try {
             synchronized (out) {
-                if (out == null)
-                    throw new IOException("Stream is closed");
+                if (out == null) throw new IOException("Stream is closed");
 
                 logger.trace("TOKEN_FROM_CONTAINER: {}", new String(Arrays.copyOfRange(buf, off, len)));
 
@@ -142,7 +138,8 @@ public class ServiceLogColoredPrintStream extends PrintStream {
                     for (int i = 0; i < tokens.size(); i++) {
                         if (isNewLine(tokens.get(i))) {
                             out.write('\n');
-                            // print the line header unless it's the last token: in that case set the reminder for the next
+                            // print the line header unless it's the last token: in that case set the reminder for the
+                            // next
                             if (i < tokens.size() - 1) {
                                 printLineHeader();
                             } else {
@@ -193,7 +190,5 @@ public class ServiceLogColoredPrintStream extends PrintStream {
             }
             return new ServiceLogColoredPrintStream(outputStream, color, prefix);
         }
-
     }
-
 }

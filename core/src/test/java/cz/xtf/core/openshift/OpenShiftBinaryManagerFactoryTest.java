@@ -7,7 +7,8 @@ public class OpenShiftBinaryManagerFactoryTest {
 
     @Test
     public void getOpenShiftBinaryManagerTest() {
-        OpenShiftBinaryManager openShiftBinaryManager = OpenShiftBinaryManagerFactory.INSTANCE.getOpenShiftBinaryManager();
+        OpenShiftBinaryManager openShiftBinaryManager =
+                OpenShiftBinaryManagerFactory.INSTANCE.getOpenShiftBinaryManager();
         Assertions.assertNotNull(openShiftBinaryManager);
         Assertions.assertEquals("/tmp/test", openShiftBinaryManager.getBinaryPath());
     }

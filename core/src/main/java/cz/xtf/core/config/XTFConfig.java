@@ -8,7 +8,6 @@ import java.nio.file.Paths;
 import java.util.Map;
 import java.util.Properties;
 import java.util.stream.Collectors;
-
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -39,12 +38,14 @@ public final class XTFConfig {
 
     public static void loadConfig() {
         properties.clear();
-        globalPropertiesPath = resolvePropertiesPath(System.getProperty(GLOBAL_TEST_PROPERTIES_PATH, "global-test.properties"));
+        globalPropertiesPath =
+                resolvePropertiesPath(System.getProperty(GLOBAL_TEST_PROPERTIES_PATH, "global-test.properties"));
         testPropertiesPath = resolvePropertiesPath(System.getProperty(TEST_PROPERTIES_PATH, "test.properties"));
         properties.putAll(XTFConfig.getPropertiesFromPath(globalPropertiesPath));
         properties.putAll(XTFConfig.getPropertiesFromPath(testPropertiesPath));
         properties.putAll(System.getenv().entrySet().stream()
-                .collect(Collectors.toMap(e -> "xtf." + e.getKey().replaceAll("_", ".").toLowerCase(), Map.Entry::getValue)));
+                .collect(Collectors.toMap(
+                        e -> "xtf." + e.getKey().replaceAll("_", ".").toLowerCase(), Map.Entry::getValue)));
         properties.putAll(System.getProperties());
 
         // Set new values based on old properties if new are not set
@@ -65,8 +66,7 @@ public final class XTFConfig {
 
     private static Path getProjectRoot() {
         Path dir = Paths.get("").toAbsolutePath();
-        while (dir.getParent().resolve("pom.xml").toFile().exists())
-            dir = dir.getParent();
+        while (dir.getParent().resolve("pom.xml").toFile().exists()) dir = dir.getParent();
         return dir;
     }
 

@@ -1,15 +1,13 @@
 package cz.xtf.builder.builders;
 
-import java.util.LinkedList;
-import java.util.List;
-
-import org.apache.commons.lang3.StringUtils;
-
 import io.fabric8.openshift.api.model.ImageStream;
 import io.fabric8.openshift.api.model.ImageStreamSpecBuilder;
 import io.fabric8.openshift.api.model.TagImportPolicy;
 import io.fabric8.openshift.api.model.TagReference;
 import io.fabric8.openshift.api.model.TagReferenceBuilder;
+import java.util.LinkedList;
+import java.util.List;
+import org.apache.commons.lang3.StringUtils;
 
 public class ImageStreamBuilder extends AbstractBuilder<ImageStream, ImageStreamBuilder> {
     private static final boolean SCHEDULED = false;
@@ -54,9 +52,9 @@ public class ImageStreamBuilder extends AbstractBuilder<ImageStream, ImageStream
             tag = nameParts[1];
         }
 
-        String remoteUri = (StringUtils.isNotBlank(registry) ? registry + "/" : "") +
-                (StringUtils.isNotBlank(repo) ? repo + "/" : "") +
-                name;
+        String remoteUri = (StringUtils.isNotBlank(registry) ? registry + "/" : "")
+                + (StringUtils.isNotBlank(repo) ? repo + "/" : "")
+                + name;
 
         remoteRepo(remoteUri);
         if (StringUtils.isNotBlank(tag)) {
@@ -101,18 +99,14 @@ public class ImageStreamBuilder extends AbstractBuilder<ImageStream, ImageStream
         return addTag(tag, sourceUrl, insecure, referencePolicyType);
     }
 
-    public ImageStreamBuilder addTag(String tag, String sourceUrl, boolean insecure,
-            TagReferencePolicyType referencePolicyType) {
-        TagReferenceBuilder trb = new TagReferenceBuilder()
-                .withName(tag);
+    public ImageStreamBuilder addTag(
+            String tag, String sourceUrl, boolean insecure, TagReferencePolicyType referencePolicyType) {
+        TagReferenceBuilder trb = new TagReferenceBuilder().withName(tag);
 
         if (StringUtils.isNotBlank(sourceUrl)) {
             trb.withImportPolicy(new TagImportPolicy(insecure, SCHEDULED));
 
-            trb.withNewFrom()
-                    .withKind("DockerImage")
-                    .withName(sourceUrl)
-                    .endFrom();
+            trb.withNewFrom().withKind("DockerImage").withName(sourceUrl).endFrom();
             trb.withNewReferencePolicy(referencePolicyType.toString());
         }
 

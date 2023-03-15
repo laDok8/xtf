@@ -1,20 +1,18 @@
 package cz.xtf.core.bm;
 
+import cz.xtf.core.openshift.OpenShift;
+import io.fabric8.kubernetes.api.model.EnvVar;
+import io.fabric8.openshift.api.model.BuildConfig;
+import io.fabric8.openshift.api.model.BuildConfigSpecBuilder;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
-
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.codec.digest.DigestUtils;
-
-import cz.xtf.core.openshift.OpenShift;
-import io.fabric8.kubernetes.api.model.EnvVar;
-import io.fabric8.openshift.api.model.BuildConfig;
-import io.fabric8.openshift.api.model.BuildConfigSpecBuilder;
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * Binary build that expect a file on path that shall be uploaded as {@code ROOT.(suffix)}. {@code suffix} is war, jar,...
@@ -28,8 +26,17 @@ public class BinaryBuildFromFile extends BinaryBuild {
     }
 
     protected void configureBuildStrategy(BuildConfigSpecBuilder builder, String builderImage, List<EnvVar> env) {
-        builder.withNewStrategy().withType("Source").withNewSourceStrategy().withEnv(env).withForcePull(true).withNewFrom()
-                .withKind("DockerImage").withName(builderImage).endFrom().endSourceStrategy().endStrategy();
+        builder.withNewStrategy()
+                .withType("Source")
+                .withNewSourceStrategy()
+                .withEnv(env)
+                .withForcePull(true)
+                .withNewFrom()
+                .withKind("DockerImage")
+                .withName(builderImage)
+                .endFrom()
+                .endSourceStrategy()
+                .endStrategy();
     }
 
     protected String getImage(BuildConfig bc) {
@@ -48,11 +55,12 @@ public class BinaryBuildFromFile extends BinaryBuild {
         if (fileName.matches(".*(\\.\\w+)$")) {
             fileName = "ROOT" + fileName.replaceFirst(".*(\\.\\w+)$", "$1");
         }
-        openShift.buildConfigs().withName(bc.getMetadata().getName())
+        openShift
+                .buildConfigs()
+                .withName(bc.getMetadata().getName())
                 .instantiateBinary()
                 .asFile(fileName)
                 .fromFile(getPath().toFile());
-
     }
 
     protected String getContentHash() {

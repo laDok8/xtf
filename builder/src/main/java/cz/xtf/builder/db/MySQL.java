@@ -25,7 +25,11 @@ public class MySQL extends AbstractSQLDatabase {
         super("MYSQL", "/var/lib/mysql/data", pvc, withLivenessProbe, withReadinessProbe);
     }
 
-    public MySQL(PersistentVolumeClaim pvc, boolean withLivenessProbe, boolean withReadinessProbe, boolean withStartupProbe) {
+    public MySQL(
+            PersistentVolumeClaim pvc,
+            boolean withLivenessProbe,
+            boolean withReadinessProbe,
+            boolean withStartupProbe) {
         super("MYSQL", "/var/lib/mysql/data", pvc, withLivenessProbe, withReadinessProbe, withStartupProbe);
     }
 
@@ -45,7 +49,8 @@ public class MySQL extends AbstractSQLDatabase {
 
     @Override
     protected ProbeSettings getProbeSettings() {
-        return new ProbeSettings(30,
+        return new ProbeSettings(
+                30,
                 String.valueOf(getPort()),
                 5,
                 "MYSQL_PWD=\"$MYSQL_PASSWORD\" mysql -h 127.0.0.1 -u $MYSQL_USER -D $MYSQL_DATABASE -e 'SELECT 1'",

@@ -22,17 +22,22 @@ public class BuildManagers {
 
                     bm = new BuildManager(OpenShifts.master(buildNamespace));
 
-                    // If the build namespace is in a separate namespace to "master" namespace, we assume it is a shared namespace
+                    // If the build namespace is in a separate namespace to "master" namespace, we assume it is a shared
+                    // namespace
                     if (!BuildManagerConfig.namespace().equals(OpenShiftConfig.namespace())) {
                         OpenShift admin = OpenShifts.admin(buildNamespace);
 
                         try {
                             if (admin.getResourceQuota("max-running-builds") == null) {
                                 ResourceQuota rq = new ResourceQuotaBuilder()
-                                        .withNewMetadata().withName("max-running-builds").endMetadata()
+                                        .withNewMetadata()
+                                        .withName("max-running-builds")
+                                        .endMetadata()
                                         .withNewSpec()
-                                        .addToHard("pods",
-                                                new Quantity(String.format("%d", BuildManagerConfig.maxRunningBuilds())))
+                                        .addToHard(
+                                                "pods",
+                                                new Quantity(
+                                                        String.format("%d", BuildManagerConfig.maxRunningBuilds())))
                                         .endSpec()
                                         .build();
                                 admin.createResourceQuota(rq);

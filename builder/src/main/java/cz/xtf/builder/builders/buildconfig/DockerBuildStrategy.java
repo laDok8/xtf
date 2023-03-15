@@ -31,10 +31,7 @@ public class DockerBuildStrategy extends BuildStrategy {
     @Override
     protected void buildStrategy(BuildStrategyBuilder builder) {
         DockerBuildStrategyBuilder strategyBuilder = new DockerBuildStrategyBuilder();
-        strategyBuilder.withNewFrom()
-                .withKind("DockerImage")
-                .withName(imageUrl)
-                .endFrom();
+        strategyBuilder.withNewFrom().withKind("DockerImage").withName(imageUrl).endFrom();
         if (noCache) {
             strategyBuilder.withNoCache(noCache);
         }

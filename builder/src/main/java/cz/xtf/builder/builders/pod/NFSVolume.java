@@ -22,9 +22,6 @@ public class NFSVolume extends Volume {
 
     @Override
     protected void addVolumeParameters(VolumeBuilder builder) {
-        builder.withNewNfs()
-                .withServer(getServer())
-                .withPath(getServerPath())
-                .endNfs();
+        builder.withNewNfs().withServer(getServer()).withPath(getServerPath()).endNfs();
     }
 }

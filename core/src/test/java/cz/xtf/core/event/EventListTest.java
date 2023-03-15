@@ -1,17 +1,14 @@
 package cz.xtf.core.event;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import cz.xtf.core.event.helpers.EventHelper;
+import io.fabric8.kubernetes.api.model.Event;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import cz.xtf.core.event.helpers.EventHelper;
-import io.fabric8.kubernetes.api.model.Event;
 
 public class EventListTest {
 
@@ -50,11 +47,25 @@ public class EventListTest {
             + "            \"type\": \"%s\"\n" // PLACEHOLDER HERE
             + "        }\n";
 
-    private static Event event(String lastTimestamp, String involvedObjectkind, String involvedObjectName, String reason,
-            String type, String message) throws JsonProcessingException {
-        return new ObjectMapper().readValue(
-                String.format(eventTemplate, involvedObjectkind, involvedObjectName, lastTimestamp, message, reason, type),
-                Event.class);
+    private static Event event(
+            String lastTimestamp,
+            String involvedObjectkind,
+            String involvedObjectName,
+            String reason,
+            String type,
+            String message)
+            throws JsonProcessingException {
+        return new ObjectMapper()
+                .readValue(
+                        String.format(
+                                eventTemplate,
+                                involvedObjectkind,
+                                involvedObjectName,
+                                lastTimestamp,
+                                message,
+                                reason,
+                                type),
+                        Event.class);
     }
 
     @Test
@@ -66,15 +77,11 @@ public class EventListTest {
                 event("2020-01-01T00:00:00Z", "Pod", "4", "Created", "Normal", "random another random"),
                 event("2020-01-01T00:00:00Z", "Pod", "5", "Created", "Normal", "message1")));
 
-        EventList filtered = events.filter()
-                .ofMessages("keyword.*")
-                .collect();
+        EventList filtered = events.filter().ofMessages("keyword.*").collect();
         Assertions.assertEquals(1, filtered.size());
         Assertions.assertEquals("2", filtered.get(0).getInvolvedObject().getName());
 
-        filtered = events.filter()
-                .ofMessages(".*keyword.*", ".*another.*")
-                .collect();
+        filtered = events.filter().ofMessages(".*keyword.*", ".*another.*").collect();
         Assertions.assertEquals(3, filtered.size());
         List<String> names = filtered.stream()
                 .map(event -> event.getInvolvedObject().getName())
@@ -83,9 +90,7 @@ public class EventListTest {
         Assertions.assertTrue(names.contains("3"));
         Assertions.assertTrue(names.contains("4"));
 
-        filtered = events.filter()
-                .ofMessages("nonexisting.*")
-                .collect();
+        filtered = events.filter().ofMessages("nonexisting.*").collect();
         Assertions.assertEquals(0, filtered.size());
     }
 
@@ -98,15 +103,11 @@ public class EventListTest {
                 event("2020-01-01T00:00:00Z", "Pod", "4", "Created", "Normal", "message"),
                 event("2020-01-01T00:00:00Z", "Pod", "5", "VolumeRecycled", "Normal", "message")));
 
-        EventList filtered = events.filter()
-                .ofReasons("created")
-                .collect();
+        EventList filtered = events.filter().ofReasons("created").collect();
         Assertions.assertEquals(1, filtered.size());
         Assertions.assertEquals("4", filtered.get(0).getInvolvedObject().getName());
 
-        filtered = events.filter()
-                .ofReasons("recyclerPod", "VolumeRecycled")
-                .collect();
+        filtered = events.filter().ofReasons("recyclerPod", "VolumeRecycled").collect();
         Assertions.assertEquals(3, filtered.size());
         List<String> names = filtered.stream()
                 .map(event -> event.getInvolvedObject().getName())
@@ -115,9 +116,7 @@ public class EventListTest {
         Assertions.assertTrue(names.contains("3"));
         Assertions.assertTrue(names.contains("5"));
 
-        filtered = events.filter()
-                .ofReasons("nonexisting.*")
-                .collect();
+        filtered = events.filter().ofReasons("nonexisting.*").collect();
         Assertions.assertEquals(0, filtered.size());
     }
 
@@ -130,15 +129,11 @@ public class EventListTest {
                 event("2020-01-01T00:00:00Z", "Pod", "4", "Created", "Normal", "message"),
                 event("2020-01-01T00:00:00Z", "weirdKind", "5", "Created", "Normal", "message")));
 
-        EventList filtered = events.filter()
-                .ofObjKinds("weirdkind")
-                .collect();
+        EventList filtered = events.filter().ofObjKinds("weirdkind").collect();
         Assertions.assertEquals(1, filtered.size());
         Assertions.assertEquals("5", filtered.get(0).getInvolvedObject().getName());
 
-        filtered = events.filter()
-                .ofObjKinds("persistentvolume", "pod")
-                .collect();
+        filtered = events.filter().ofObjKinds("persistentvolume", "pod").collect();
         Assertions.assertEquals(3, filtered.size());
         List<String> names = filtered.stream()
                 .map(event -> event.getInvolvedObject().getName())
@@ -147,9 +142,7 @@ public class EventListTest {
         Assertions.assertTrue(names.contains("2"));
         Assertions.assertTrue(names.contains("4"));
 
-        filtered = events.filter()
-                .ofObjKinds("nonexisting.*")
-                .collect();
+        filtered = events.filter().ofObjKinds("nonexisting.*").collect();
         Assertions.assertEquals(0, filtered.size());
     }
 
@@ -162,15 +155,11 @@ public class EventListTest {
                 event("2020-01-01T00:00:00Z", "Pod", "4", "Created", "Failure", "message"),
                 event("2020-01-01T00:00:00Z", "Pod", "5", "Created", "Normal", "message")));
 
-        EventList filtered = events.filter()
-                .ofEventTypes("error")
-                .collect();
+        EventList filtered = events.filter().ofEventTypes("error").collect();
         Assertions.assertEquals(1, filtered.size());
         Assertions.assertEquals("3", filtered.get(0).getInvolvedObject().getName());
 
-        filtered = events.filter()
-                .ofEventTypes("normal", "warning")
-                .collect();
+        filtered = events.filter().ofEventTypes("normal", "warning").collect();
         Assertions.assertEquals(3, filtered.size());
         List<String> names = filtered.stream()
                 .map(event -> event.getInvolvedObject().getName())
@@ -179,9 +168,7 @@ public class EventListTest {
         Assertions.assertTrue(names.contains("2"));
         Assertions.assertTrue(names.contains("5"));
 
-        filtered = events.filter()
-                .ofEventTypes("nonexisting.*")
-                .collect();
+        filtered = events.filter().ofEventTypes("nonexisting.*").collect();
         Assertions.assertEquals(0, filtered.size());
     }
 
@@ -194,15 +181,11 @@ public class EventListTest {
                 event("2020-01-01T00:00:00Z", "4", "three", "Created", "Normal", "message"),
                 event("2020-01-01T00:00:00Z", "5", "four", "Created", "Normal", "message")));
 
-        EventList filtered = events.filter()
-                .ofObjNames("two")
-                .collect();
+        EventList filtered = events.filter().ofObjNames("two").collect();
         Assertions.assertEquals(1, filtered.size());
         Assertions.assertEquals("2", filtered.get(0).getInvolvedObject().getKind());
 
-        filtered = events.filter()
-                .ofObjNames("oneapp.*", "three.*")
-                .collect();
+        filtered = events.filter().ofObjNames("oneapp.*", "three.*").collect();
         Assertions.assertEquals(3, filtered.size());
         List<String> names = filtered.stream()
                 .map(event -> event.getInvolvedObject().getKind())
@@ -211,9 +194,7 @@ public class EventListTest {
         Assertions.assertTrue(names.contains("3"));
         Assertions.assertTrue(names.contains("4"));
 
-        filtered = events.filter()
-                .ofEventTypes("nonexisting.*")
-                .collect();
+        filtered = events.filter().ofEventTypes("nonexisting.*").collect();
         Assertions.assertEquals(0, filtered.size());
     }
 
@@ -256,7 +237,8 @@ public class EventListTest {
         Assertions.assertTrue(names.contains("7"));
 
         filtered = events.filter()
-                .inOneOfTimeWindows(EventHelper.timestampToZonedDateTime("2021-01-01T03:00:01Z"),
+                .inOneOfTimeWindows(
+                        EventHelper.timestampToZonedDateTime("2021-01-01T03:00:01Z"),
                         EventHelper.timestampToZonedDateTime("2021-01-01T03:00:01Z"))
                 .collect();
         Assertions.assertEquals(0, filtered.size());
@@ -273,14 +255,20 @@ public class EventListTest {
                 event("2020-01-01T05:00:00Z", "Pod", "6", "Created", "Normal", "message"),
                 event("2020-01-01T06:00:00Z", "Pod", "7", "Created", "Normal", "message"),
                 // looking for this one
-                event("2020-01-01T07:00:00Z", "deploymentconfig", "myapp-deploy", "Created", "Normal", "buzz keyword noise"),
+                event(
+                        "2020-01-01T07:00:00Z",
+                        "deploymentconfig",
+                        "myapp-deploy",
+                        "Created",
+                        "Normal",
+                        "buzz keyword noise"),
                 event("2020-01-01T07:20:00Z", "Pod", "myapp-xyz", "Created", "Normal", "message"),
                 event("2020-01-01T17:22:00Z", "deploymentconfig", "7", "Created", "Normal", "message"),
                 event("2020-01-01T11:00:00Z", "Pod", "7", "Created", "Normal", "message"),
                 event("2020-01-01T12:00:00Z", "deploymentconfig", "7", "Created", "Normal", "message"),
                 event("2020-01-01T13:00:00Z", "deploymentconfig", "7", "Created", "Normal", "message"),
                 event("2020-01-01T14:00:00Z", "Pod", "7", "Created", "Normal", "message"),
-                //looking for this one
+                // looking for this one
                 event("2020-01-01T15:00:00Z", "Pod", "myapp-run", "failed", "Error", "silence foobar noise"),
                 event("2020-01-01T15:10:00Z", "Pod", "7", "Created", "Normal", "message")));
 

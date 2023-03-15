@@ -11,5 +11,4 @@ public class HelmBinaryManagerFactoryTest {
         Assertions.assertNotNull(helmBinaryManager);
         Assertions.assertEquals("/tmp/helm", helmBinaryManager.getHelmBinaryPath());
     }
-
 }

@@ -1,13 +1,5 @@
 package cz.xtf.core.openshift;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.concurrent.TimeUnit;
-import java.util.function.BooleanSupplier;
-import java.util.function.Function;
-import java.util.function.Supplier;
-
 import cz.xtf.core.config.WaitingConfig;
 import cz.xtf.core.openshift.crd.CustomResourceDefinitionContextProvider;
 import cz.xtf.core.openshift.helpers.ResourceFunctions;
@@ -23,6 +15,13 @@ import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.openshift.api.model.Build;
 import io.fabric8.openshift.api.model.BuildStatus;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
+import java.util.function.BooleanSupplier;
+import java.util.function.Function;
+import java.util.function.Supplier;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -59,16 +58,24 @@ public class OpenShiftWaiters {
      */
     public Waiter hasBuildCompleted(String buildConfigName) {
         Supplier<String> supplier = () -> Optional.ofNullable(openShift.getLatestBuild(buildConfigName))
-                .map(Build::getMetadata).map(ObjectMeta::getName)
-                .map(openShift::getBuild).map(Build::getStatus).map(BuildStatus::getPhase)
+                .map(Build::getMetadata)
+                .map(ObjectMeta::getName)
+                .map(openShift::getBuild)
+                .map(Build::getStatus)
+                .map(BuildStatus::getPhase)
                 .orElse(null);
         String reason = "Waiting for completion of latest build " + buildConfigName;
 
-        return new SupplierWaiter<>(supplier, "Complete"::equals, "Failed"::equals, TimeUnit.MILLISECONDS,
-                WaitingConfig.buildTimeout(), reason)
-                        .logPoint(Waiter.LogPoint.BOTH)
-                        .failFast(failFast)
-                        .interval(5_000);
+        return new SupplierWaiter<>(
+                        supplier,
+                        "Complete"::equals,
+                        "Failed"::equals,
+                        TimeUnit.MILLISECONDS,
+                        WaitingConfig.buildTimeout(),
+                        reason)
+                .logPoint(Waiter.LogPoint.BOTH)
+                .failFast(failFast)
+                .interval(5_000);
     }
 
     /**
@@ -80,14 +87,20 @@ public class OpenShiftWaiters {
      * @return Waiter instance
      */
     public Waiter hasBuildCompleted(Build build) {
-        Supplier<String> supplier = () -> openShift.getBuild(build.getMetadata().getName()).getStatus().getPhase();
+        Supplier<String> supplier = () ->
+                openShift.getBuild(build.getMetadata().getName()).getStatus().getPhase();
         String reason = "Waiting for completion of build " + build.getMetadata().getName();
 
-        return new SupplierWaiter<>(supplier, "Complete"::equals, "Failed"::equals, TimeUnit.MILLISECONDS,
-                WaitingConfig.buildTimeout(), reason)
-                        .logPoint(Waiter.LogPoint.BOTH)
-                        .failFast(failFast)
-                        .interval(5_000);
+        return new SupplierWaiter<>(
+                        supplier,
+                        "Complete"::equals,
+                        "Failed"::equals,
+                        TimeUnit.MILLISECONDS,
+                        WaitingConfig.buildTimeout(),
+                        reason)
+                .logPoint(Waiter.LogPoint.BOTH)
+                .failFast(failFast)
+                .interval(5_000);
     }
 
     /**
@@ -101,7 +114,8 @@ public class OpenShiftWaiters {
         Supplier<Build> supplier = () -> openShift.getLatestBuild(buildConfigName);
         String reason = "Waiting for presence of latest build of buildconfig " + buildConfigName;
 
-        return new SupplierWaiter<>(supplier, Objects::nonNull, reason).logPoint(Waiter.LogPoint.BOTH)
+        return new SupplierWaiter<>(supplier, Objects::nonNull, reason)
+                .logPoint(Waiter.LogPoint.BOTH)
                 .failFast(failFast)
                 .interval(5_000);
     }
@@ -112,9 +126,12 @@ public class OpenShiftWaiters {
      * @return Waiter instance
      */
     public Waiter isProjectReady() {
-        return new SimpleWaiter(() -> openShift.getProject() != null, TimeUnit.SECONDS, 20,
-                "Waiting for the project to be created.")
-                        .failFast(failFast);
+        return new SimpleWaiter(
+                        () -> openShift.getProject() != null,
+                        TimeUnit.SECONDS,
+                        20,
+                        "Waiting for the project to be created.")
+                .failFast(failFast);
     }
 
     /**
@@ -123,43 +140,52 @@ public class OpenShiftWaiters {
      * @return Waiter instance
      */
     public Waiter isProjectClean() {
-        return new SimpleWaiter(() -> {
-            int crdInstances = 0;
-            List<GenericKubernetesResource> customResourceDefinitionList = null;
-            for (CustomResourceDefinitionContextProvider crdContextProvider : OpenShift.getCRDContextProviders()) {
-                try {
-                    customResourceDefinitionList = openShift.customResources(crdContextProvider.getContext(),
-                            GenericKubernetesResource.class, GenericKubernetesResourceList.class)
-                            .inNamespace(openShift.getNamespace())
-                            .list().getItems();
-                    crdInstances += customResourceDefinitionList.size();
-                } catch (KubernetesClientException kce) {
-                    // CRD might not be installed on the cluster
-                }
-            }
+        return new SimpleWaiter(
+                        () -> {
+                            int crdInstances = 0;
+                            List<GenericKubernetesResource> customResourceDefinitionList = null;
+                            for (CustomResourceDefinitionContextProvider crdContextProvider :
+                                    OpenShift.getCRDContextProviders()) {
+                                try {
+                                    customResourceDefinitionList = openShift
+                                            .customResources(
+                                                    crdContextProvider.getContext(),
+                                                    GenericKubernetesResource.class,
+                                                    GenericKubernetesResourceList.class)
+                                            .inNamespace(openShift.getNamespace())
+                                            .list()
+                                            .getItems();
+                                    crdInstances += customResourceDefinitionList.size();
+                                } catch (KubernetesClientException kce) {
+                                    // CRD might not be installed on the cluster
+                                }
+                            }
 
-            boolean isClean = false;
-            List<HasMetadata> listRemovableResources = openShift.listRemovableResources();
-            if (crdInstances == 0 & listRemovableResources.isEmpty()) {
-                isClean = true;
-            } else {
-                StringBuilder strBuilderResourcesToDelete = new StringBuilder(
-                        "Cleaning project - " + openShift.getNamespace()
-                                + " Waiting for following resources to be deleted: \n");
-                if (customResourceDefinitionList != null && !customResourceDefinitionList.isEmpty()) {
-                    customResourceDefinitionList.stream().forEach((r) -> {
-                        strBuilderResourcesToDelete.append(r + "\n");
-                    });
-                }
-                if (!listRemovableResources.isEmpty()) {
-                    listRemovableResources.stream().forEach((r) -> {
-                        strBuilderResourcesToDelete.append(r + "\n");
-                    });
-                }
-                log.debug(strBuilderResourcesToDelete.toString());
-            }
-            return isClean;
-        }, TimeUnit.MILLISECONDS, WaitingConfig.timeoutCleanup(), "Cleaning project - " + openShift.getNamespace())
+                            boolean isClean = false;
+                            List<HasMetadata> listRemovableResources = openShift.listRemovableResources();
+                            if (crdInstances == 0 & listRemovableResources.isEmpty()) {
+                                isClean = true;
+                            } else {
+                                StringBuilder strBuilderResourcesToDelete =
+                                        new StringBuilder("Cleaning project - " + openShift.getNamespace()
+                                                + " Waiting for following resources to be deleted: \n");
+                                if (customResourceDefinitionList != null && !customResourceDefinitionList.isEmpty()) {
+                                    customResourceDefinitionList.stream().forEach((r) -> {
+                                        strBuilderResourcesToDelete.append(r + "\n");
+                                    });
+                                }
+                                if (!listRemovableResources.isEmpty()) {
+                                    listRemovableResources.stream().forEach((r) -> {
+                                        strBuilderResourcesToDelete.append(r + "\n");
+                                    });
+                                }
+                                log.debug(strBuilderResourcesToDelete.toString());
+                            }
+                            return isClean;
+                        },
+                        TimeUnit.MILLISECONDS,
+                        WaitingConfig.timeoutCleanup(),
+                        "Cleaning project - " + openShift.getNamespace())
                 .onTimeout(() -> log.info("Cleaning namespace: " + openShift.getNamespace() + " - timed out."))
                 .onFailure(() -> log.info("Cleaning namespace: " + openShift.getNamespace() + " - failed."))
                 .onSuccess(() -> log.info("Cleaning namespace: " + openShift.getNamespace() + " - finished."))
@@ -215,7 +241,8 @@ public class OpenShiftWaiters {
      */
     public Waiter isDeploymentReady(String dcName, int version, int restartTolerance) {
         Supplier<List<Pod>> ps = () -> openShift.getPods(dcName, version);
-        String reason = "Waiting till all pods created by " + version + ". of " + dcName + " deployment config are ready";
+        String reason =
+                "Waiting till all pods created by " + version + ". of " + dcName + " deployment config are ready";
 
         return isDeploymentReady(dcName, ps, restartTolerance).reason(reason);
     }
@@ -272,7 +299,8 @@ public class OpenShiftWaiters {
      * @return Waiter instance
      */
     public Waiter areExactlyNPodsRunning(int n) {
-        return areExactlyNPodsRunning(n, openShift::getPods).reason("Waiting for exactly " + n + " pods to be running.");
+        return areExactlyNPodsRunning(n, openShift::getPods)
+                .reason("Waiting for exactly " + n + " pods to be running.");
     }
 
     public Waiter areExactlyNPodsRunning(int n, String dcName) {
@@ -336,11 +364,13 @@ public class OpenShiftWaiters {
 
     public Waiter havePodsBeenRestartedAtLeastNTimes(int times, String key, String value) {
         Supplier<List<Pod>> ps = () -> openShift.getLabeledPods(key, value);
-        String reason = "Waiting for any pods with label " + key + "=" + value + " having a restart count >= " + times + ".";
+        String reason =
+                "Waiting for any pods with label " + key + "=" + value + " having a restart count >= " + times + ".";
         return havePodsBeenRestartedAtLeastNTimes(times, ps).reason(reason);
     }
 
     private Waiter havePodsBeenRestartedAtLeastNTimes(int times, Supplier<List<Pod>> podSupplier) {
-        return new SupplierWaiter<>(podSupplier, ResourceFunctions.haveAnyPodRestartedAtLeastNTimes(times)).failFast(failFast);
+        return new SupplierWaiter<>(podSupplier, ResourceFunctions.haveAnyPodRestartedAtLeastNTimes(times))
+                .failFast(failFast);
     }
 }

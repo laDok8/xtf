@@ -1,11 +1,10 @@
 package cz.xtf.core.event;
 
+import cz.xtf.core.event.helpers.EventHelper;
+import io.fabric8.kubernetes.api.model.Event;
 import java.time.ZonedDateTime;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import cz.xtf.core.event.helpers.EventHelper;
-import io.fabric8.kubernetes.api.model.Event;
 
 public class EventListFilter {
 
@@ -29,7 +28,8 @@ public class EventListFilter {
      * For example: {@code Warning}, {@code Normal}, ...
      */
     public EventListFilter ofObjKinds(String... kinds) {
-        stream = stream.filter(event -> isStrInArrayCaseInsensitive(event.getInvolvedObject().getKind(), kinds));
+        stream = stream.filter(
+                event -> isStrInArrayCaseInsensitive(event.getInvolvedObject().getKind(), kinds));
         return this;
     }
 
@@ -115,8 +115,8 @@ public class EventListFilter {
      * Filter events that are last seen strictly after the date.
      */
     public EventListFilter after(ZonedDateTime date) {
-        stream = stream.filter(
-                e -> e.getLastTimestamp() != null && EventHelper.timestampToZonedDateTime(e.getLastTimestamp()).isAfter(date));
+        stream = stream.filter(e -> e.getLastTimestamp() != null
+                && EventHelper.timestampToZonedDateTime(e.getLastTimestamp()).isAfter(date));
         return this;
     }
 

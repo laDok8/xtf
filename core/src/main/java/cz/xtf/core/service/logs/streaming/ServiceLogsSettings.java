@@ -55,13 +55,10 @@ public class ServiceLogsSettings {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o)
-            return true;
-        if (o == null || getClass() != o.getClass())
-            return false;
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
         ServiceLogsSettings that = (ServiceLogsSettings) o;
-        return target.equals(that.target) && filter.equals(that.filter)
-                && outputPath.equals(that.outputPath);
+        return target.equals(that.target) && filter.equals(that.filter) && outputPath.equals(that.outputPath);
     }
 
     @Override

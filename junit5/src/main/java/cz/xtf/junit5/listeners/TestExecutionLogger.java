@@ -2,12 +2,10 @@ package cz.xtf.junit5.listeners;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
+import lombok.extern.slf4j.Slf4j;
 import org.junit.platform.engine.TestExecutionResult;
 import org.junit.platform.launcher.TestExecutionListener;
 import org.junit.platform.launcher.TestIdentifier;
-
-import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class TestExecutionLogger implements TestExecutionListener {
@@ -63,7 +61,9 @@ public class TestExecutionLogger implements TestExecutionListener {
      * @return Customized test display name
      */
     private String getTestDisplayName(TestIdentifier testIdentifier) {
-        String className = testIdentifier.getParentId().get()
+        String className = testIdentifier
+                .getParentId()
+                .get()
                 .replaceAll(".*class:", "") // cut of everything before class: string
                 .replaceAll("].*", "") // cut of everything after full class name
                 .replaceAll(".*\\.", ""); // cut of everyting before dot (output: class name)

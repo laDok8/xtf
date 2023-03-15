@@ -1,16 +1,5 @@
 package cz.xtf.junit5.model;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-
-import org.apache.commons.lang3.StringUtils;
-
 import cz.xtf.core.config.OpenShiftConfig;
 import cz.xtf.core.image.Image;
 import cz.xtf.core.namespace.NamespaceManager;
@@ -22,6 +11,15 @@ import io.fabric8.openshift.api.model.ImageStream;
 import io.fabric8.openshift.api.model.ImageStreamTag;
 import io.fabric8.openshift.api.model.NamedTagEventList;
 import io.fabric8.openshift.api.model.TagEventCondition;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * Represents Docker image metadata by exposing convenience methods to access
@@ -78,7 +76,7 @@ public class DockerImageMetadata {
             return metadataFromTag;
         }
 
-        //create namespace if not exists
+        // create namespace if not exists
         final boolean isNewProject = NamespaceManager.createIfDoesNotExistsProject(OpenShiftConfig.namespace());
 
         // create new one of unique name
@@ -89,15 +87,15 @@ public class DockerImageMetadata {
 
         // wait till metadata are available
         Waiter metadataWaiter = new SimpleWaiter(
-                () -> DockerImageMetadata.areMetadataForImageReady(openShift.getImageStreamTag(tempName, image.getMajorTag())),
-                "Giving OpenShift instance time to download image metadata.")
-                        .failFast(new ImageStreamFailFastCheck(openShift, tempName, image));
+                        () -> DockerImageMetadata.areMetadataForImageReady(
+                                openShift.getImageStreamTag(tempName, image.getMajorTag())),
+                        "Giving OpenShift instance time to download image metadata.")
+                .failFast(new ImageStreamFailFastCheck(openShift, tempName, image));
         boolean metadataOK = metadataWaiter.waitFor();
 
         // delete unique image stream and return metadata
-        DockerImageMetadata metadata = metadataOK
-                ? getMetadataFromTag(openShift.getImageStreamTag(tempName, image.getMajorTag()))
-                : null;
+        DockerImageMetadata metadata =
+                metadataOK ? getMetadataFromTag(openShift.getImageStreamTag(tempName, image.getMajorTag())) : null;
         openShift.deleteImageStream(imageStream);
         if (isNewProject) {
             NamespaceManager.deleteProject(OpenShiftConfig.namespace(), true);
@@ -107,17 +105,21 @@ public class DockerImageMetadata {
 
     private static DockerImageMetadata getMetadataFromTag(ImageStreamTag imageStreamTag) {
         return areMetadataForImageReady(imageStreamTag)
-                ? new DockerImageMetadata(imageStreamTag.getImage().getDockerImageMetadata().getAdditionalProperties())
+                ? new DockerImageMetadata(
+                        imageStreamTag.getImage().getDockerImageMetadata().getAdditionalProperties())
                 : null;
     }
 
     private static boolean areMetadataForImageReady(ImageStreamTag tag) {
-        return tag != null && tag.getImage() != null && tag.getImage().getDockerImageMetadata() != null
+        return tag != null
+                && tag.getImage() != null
+                && tag.getImage().getDockerImageMetadata() != null
                 && tag.getImage().getDockerImageMetadata().getAdditionalProperties() != null;
     }
 
     private static String randomString() {
-        return new Random().ints('a', 'z' + 1)
+        return new Random()
+                .ints('a', 'z' + 1)
                 .limit(5)
                 .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
                 .toString();
@@ -145,11 +147,10 @@ public class DockerImageMetadata {
         final Map<String, String> envMap = new HashMap<>();
 
         List<String> envList = (List<String>) getConfig().get(METADATA_CONFIG_ENV);
-        envList.forEach(
-                node -> {
-                    String[] keyValue = node.split("=", 2);
-                    envMap.put(keyValue[0], keyValue[1]);
-                });
+        envList.forEach(node -> {
+            String[] keyValue = node.split("=", 2);
+            envMap.put(keyValue[0], keyValue[1]);
+        });
         return Collections.unmodifiableMap(envMap);
     }
 
@@ -179,14 +180,14 @@ public class DockerImageMetadata {
      */
     public Set<Integer> exposedPorts(String protocol) {
         final Set<Integer> result = new HashSet<>();
-        final Map<String, Object> exposedPorts = (Map<String, Object>) getConfig().get(METADATA_CONFIG_EXPOSED_PORTS);
-        exposedPorts.keySet().forEach(
-                portDef -> {
-                    final String[] split = portDef.split("/");
-                    if (StringUtils.isBlank(protocol) || split[1].equalsIgnoreCase(protocol)) {
-                        result.add(Integer.parseInt(split[0]));
-                    }
-                });
+        final Map<String, Object> exposedPorts =
+                (Map<String, Object>) getConfig().get(METADATA_CONFIG_EXPOSED_PORTS);
+        exposedPorts.keySet().forEach(portDef -> {
+            final String[] split = portDef.split("/");
+            if (StringUtils.isBlank(protocol) || split[1].equalsIgnoreCase(protocol)) {
+                result.add(Integer.parseInt(split[0]));
+            }
+        });
 
         return result;
     }
@@ -213,7 +214,8 @@ public class DockerImageMetadata {
             for (NamedTagEventList tag : imageStream.getStatus().getTags()) {
                 if (image.getTag().startsWith(tag.getTag())) {
                     for (TagEventCondition condition : tag.getConditions()) {
-                        if (condition.getType().equals("ImportSuccess") && condition.getStatus().equals("False")) {
+                        if (condition.getType().equals("ImportSuccess")
+                                && condition.getStatus().equals("False")) {
                             reason = condition.getMessage();
                             return true;
                         }

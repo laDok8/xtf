@@ -1,5 +1,6 @@
 package cz.xtf.core.openshift;
 
+import cz.xtf.core.config.OpenShiftConfig;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -7,11 +8,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.Objects;
-
-import org.apache.commons.lang3.StringUtils;
-
-import cz.xtf.core.config.OpenShiftConfig;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 @Slf4j
 class OpenShiftBinaryManager {
@@ -29,20 +27,31 @@ class OpenShiftBinaryManager {
     OpenShiftBinary masterBinary(String namespace) {
         Objects.requireNonNull(namespace);
 
-        return getBinary(OpenShiftConfig.masterToken(), OpenShiftConfig.masterUsername(), OpenShiftConfig.masterPassword(),
-                OpenShiftConfig.masterKubeconfig(), namespace);
+        return getBinary(
+                OpenShiftConfig.masterToken(),
+                OpenShiftConfig.masterUsername(),
+                OpenShiftConfig.masterPassword(),
+                OpenShiftConfig.masterKubeconfig(),
+                namespace);
     }
 
     OpenShiftBinary adminBinary(String namespace) {
         Objects.requireNonNull(namespace);
 
-        return getBinary(OpenShiftConfig.adminToken(), OpenShiftConfig.adminUsername(), OpenShiftConfig.adminPassword(),
-                OpenShiftConfig.adminKubeconfig(), namespace);
+        return getBinary(
+                OpenShiftConfig.adminToken(),
+                OpenShiftConfig.adminUsername(),
+                OpenShiftConfig.adminPassword(),
+                OpenShiftConfig.adminKubeconfig(),
+                namespace);
     }
 
-    private OpenShiftBinary getBinary(String token, String username, String password, String kubeconfig,
-            String namespace) {
-        String ocConfigPath = createUniqueOcConfigFolder().resolve("oc.config").toAbsolutePath().toString();
+    private OpenShiftBinary getBinary(
+            String token, String username, String password, String kubeconfig, String namespace) {
+        String ocConfigPath = createUniqueOcConfigFolder()
+                .resolve("oc.config")
+                .toAbsolutePath()
+                .toString();
         OpenShiftBinary openShiftBinary;
 
         if (StringUtils.isNotEmpty(token) || StringUtils.isNotEmpty(username)) {
@@ -64,10 +73,14 @@ class OpenShiftBinaryManager {
                 }
             } else {
                 // We copy the default ~/.kube/config
-                File defaultKubeConfig = Paths.get(getHomeDir(), ".kube", "config").toFile();
+                File defaultKubeConfig =
+                        Paths.get(getHomeDir(), ".kube", "config").toFile();
                 if (defaultKubeConfig.isFile()) {
                     try {
-                        Files.copy(defaultKubeConfig.toPath(), Paths.get(ocConfigPath), StandardCopyOption.REPLACE_EXISTING);
+                        Files.copy(
+                                defaultKubeConfig.toPath(),
+                                Paths.get(ocConfigPath),
+                                StandardCopyOption.REPLACE_EXISTING);
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }

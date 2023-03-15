@@ -1,11 +1,10 @@
 package cz.xtf.core.waiting.failfast;
 
-import java.time.ZonedDateTime;
-import java.util.Arrays;
-
 import cz.xtf.core.event.EventList;
 import cz.xtf.core.event.EventListFilter;
 import cz.xtf.core.openshift.OpenShift;
+import java.time.ZonedDateTime;
+import java.util.Arrays;
 
 /**
  * Builder for creating fail fast checks for event
@@ -86,7 +85,7 @@ public class EventFailFastCheckBuilder {
 
     /**
      * If at least one event exist (after filtration), final function returns true.
-     * 
+     *
      * @return this
      */
     public FailFastBuilder atLeastOneExists() {
@@ -101,7 +100,10 @@ public class EventFailFastCheckBuilder {
 
     private String failFastReason(EventList eventList, String condition) {
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("Following events match condition: <").append(condition).append(">\n");
+        stringBuilder
+                .append("Following events match condition: <")
+                .append(condition)
+                .append(">\n");
         eventList.forEach(e -> stringBuilder
                 .append("\t")
                 .append(e.getLastTimestamp())
@@ -114,25 +116,39 @@ public class EventFailFastCheckBuilder {
                 .append("\n"));
         stringBuilder.append("Filter:");
         if (kinds != null) {
-            stringBuilder.append("\t obj kinds: ").append(Arrays.toString(kinds)).append("\n");
+            stringBuilder
+                    .append("\t obj kinds: ")
+                    .append(Arrays.toString(kinds))
+                    .append("\n");
         }
         if (names != null) {
-            stringBuilder.append("\t obj names: ").append(Arrays.toString(names)).append("\n");
+            stringBuilder
+                    .append("\t obj names: ")
+                    .append(Arrays.toString(names))
+                    .append("\n");
         }
         if (reasons != null) {
-            stringBuilder.append("\t event reasons: ").append(Arrays.toString(reasons)).append("\n");
+            stringBuilder
+                    .append("\t event reasons: ")
+                    .append(Arrays.toString(reasons))
+                    .append("\n");
         }
         if (messages != null) {
-            stringBuilder.append("\t messages: ").append(Arrays.toString(messages)).append("\n");
+            stringBuilder
+                    .append("\t messages: ")
+                    .append(Arrays.toString(messages))
+                    .append("\n");
         }
         if (types != null) {
-            stringBuilder.append("\t event types: ").append(Arrays.toString(types)).append("\n");
+            stringBuilder
+                    .append("\t event types: ")
+                    .append(Arrays.toString(types))
+                    .append("\n");
         }
         if (after != null) {
             stringBuilder.append("\t after: ").append(after.toString()).append("\n");
         }
         return stringBuilder.toString();
-
     }
 
     /**
