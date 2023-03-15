@@ -110,8 +110,8 @@ public class OpenShifts {
      * The file can be accessed using {@link #getOcFromCache(String, String, File)}.
      * It works only if {@link OpenShiftConfig#isBinaryCacheEnabled()}.
      *
-     * @param version String, OCP cluster version.
-     * @param ocUrl String, download URL.
+     * @param version   String, OCP cluster version.
+     * @param ocUrl     String, download URL.
      * @param ocTarFile String, workdir file.
      * @throws IOException
      * @deprecated this should have never been made public, can be removed in future versions. It is not used internally by XTF
@@ -132,8 +132,8 @@ public class OpenShifts {
     /**
      * Retrieve the file from the folder populated by {@link #saveOcOnCache(String, String, File)}.
      *
-     * @param version String, OCP cluster version.
-     * @param ocUrl String, download URL.
+     * @param version   String, OCP cluster version.
+     * @param ocUrl     String, download URL.
      * @param ocTarFile String, workdir file.
      * @return File, reference to the file, if the cache is not populated, the file is not null, but it doesn't exist.
      * @throws IOException

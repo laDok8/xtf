@@ -41,7 +41,7 @@ public class OpenShiftWaiters {
 
     /**
      * @param openShift openshift client
-     * @param failFast {@link BooleanSupplier} that returns true if waiter should fail due to error state of i.e. OpenShift
+     * @param failFast  {@link BooleanSupplier} that returns true if waiter should fail due to error state of i.e. OpenShift
      *
      * @return returns Openshift waiters
      */
@@ -181,7 +181,7 @@ public class OpenShiftWaiters {
      * Creates a waiter object that waits till all pods created by deployment config with name {@code dcName} are ready.
      * Tolerates {@code restartTolerace} container restarts. Uses default timeout.
      *
-     * @param dcName name of deploymentConfig
+     * @param dcName           name of deploymentConfig
      * @param restartTolerance number of container rest
      * @return Waiter instance
      */
@@ -196,7 +196,7 @@ public class OpenShiftWaiters {
      * Creates a waiter object that waits till all pods created by deployment config with name {@code dcName} are ready.
      * Tolerates any container restarts. Uses default timeout.
      *
-     * @param dcName name of deploymentConfig
+     * @param dcName  name of deploymentConfig
      * @param version version of deploymentConfig to be waited upon
      * @return Waiter instance
      */
@@ -208,8 +208,8 @@ public class OpenShiftWaiters {
      * Creates a waiter object that waits till all pods created by deployment config with name {@code dcName} are ready.
      * Tolerates any container restarts. Uses default timeout.
      *
-     * @param dcName name of deploymentConfig
-     * @param version deployment version
+     * @param dcName           name of deploymentConfig
+     * @param version          deployment version
      * @param restartTolerance number of container rest
      * @return Waiter instance
      */
@@ -248,8 +248,8 @@ public class OpenShiftWaiters {
      * Creates a waiter that checks that exactly n pods is ready in project.
      * Uses default timeout. Tolerates any container restarts.
      *
-     * @param n number of expected pods to wait upon
-     * @param key label key for pod filtering
+     * @param n     number of expected pods to wait upon
+     * @param key   label key for pod filtering
      * @param value label value for pod filtering
      * @return Waiter instance
      */
@@ -283,8 +283,8 @@ public class OpenShiftWaiters {
      * Creates a waiter that checks that exactly n pods is running in project.
      * Uses default timeout. Tolerates any container restarts.
      *
-     * @param n number of expected pods to wait upon
-     * @param key label key for pod filtering
+     * @param n     number of expected pods to wait upon
+     * @param key   label key for pod filtering
      * @param value label value for pod filtering
      * @return Waiter instance
      */
@@ -307,7 +307,7 @@ public class OpenShiftWaiters {
      * Creates a waiter that waits until there aren't any pods in project.
      * Uses default timeout.
      *
-     * @param key label key for pod filtering
+     * @param key   label key for pod filtering
      * @param value label value for pod filtering
      * @return Waiter instance
      */

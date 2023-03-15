@@ -36,7 +36,7 @@ public class ImageMetadata {
     /**
      * Creates ImageStream in provided OpenShift context and pulls back ImageStreamTag with imageUrl metadata.
      *
-     * @param imageUrl image url to initialize new instance of this object
+     * @param imageUrl  image url to initialize new instance of this object
      * @param openShift context for creating ImageStream and retrieving image metadata
      * @return new instance
      */

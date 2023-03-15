@@ -126,7 +126,7 @@ public class NamespaceManager {
     /**
      * Deletes namespace
      *
-     * @param namespace namespace name to delete
+     * @param namespace       namespace name to delete
      * @param waitForDeletion whether to wait for deletion (timeout 2 min)
      *
      * @return true if successful, false otherwise

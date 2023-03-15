@@ -36,7 +36,7 @@ public class OpenShiftBinary {
      * Delegates to `oc apply --filename='sourcepath' --namespace='namespace'`
      * 
      * @param sourcePath path to configration file
-     * @param namespace namespace
+     * @param namespace  namespace
      */
     public void apply(String namespace, String sourcePath) {
         this.execute("apply", "--namespace=" + namespace, "--filename=" + sourcePath);
@@ -65,7 +65,7 @@ public class OpenShiftBinary {
     /**
      * Apply configuration files in the order they appear in the list, using supplied namespace.
      * 
-     * @param namespace namespace in which the configuration files should be applied
+     * @param namespace   namespace in which the configuration files should be applied
      * @param sourcePaths list of paths to configuration files
      */
     public void apply(String namespace, List<String> sourcePaths) {

@@ -236,7 +236,7 @@ public class OpenShift extends DefaultOpenShiftClient {
      * Linking Secret to ServiceAccount is based on OpenShift documentation:
      * https://docs.openshift.com/container-platform/4.2/openshift_images/managing-images/using-image-pull-secrets.html
      *
-     * @param name of the Secret to be created
+     * @param name   of the Secret to be created
      * @param secret content of Secret in json format
      */
     public void setupPullSecret(String name, String secret) {
@@ -527,7 +527,7 @@ public class OpenShift extends DefaultOpenShiftClient {
 
     /**
      * @param deploymentConfigName name of deploymentConfig
-     * @param version deployment version to be retrieved
+     * @param version              deployment version to be retrieved
      * @return active pods created by deploymentConfig with specified version
      */
     public List<Pod> getPods(String deploymentConfigName, int version) {
@@ -566,7 +566,7 @@ public class OpenShift extends DefaultOpenShiftClient {
     /**
      * Deletes pods with specified label.
      *
-     * @param key key of the label
+     * @param key   key of the label
      * @param value value of the label
      * @return True if any pod has been deleted
      */
@@ -765,7 +765,7 @@ public class OpenShift extends DefaultOpenShiftClient {
     /**
      * Updates deployment config environment variables with envVars values.
      *
-     * @param name name of deploymentConfig
+     * @param name    name of deploymentConfig
      * @param envVars environment variables
      *
      * @return deployment config
@@ -793,7 +793,7 @@ public class OpenShift extends DefaultOpenShiftClient {
     /**
      * Scales deployment config to specified number of replicas.
      *
-     * @param name name of deploymentConfig
+     * @param name     name of deploymentConfig
      * @param replicas number of target replicas
      */
     public void scale(String name, int replicas) {
@@ -875,7 +875,7 @@ public class OpenShift extends DefaultOpenShiftClient {
     /**
      * Updates build config with specified environment variables.
      *
-     * @param name name of buildConfig
+     * @param name    name of buildConfig
      * @param envVars environment variables
      *
      * @return build config
@@ -1003,7 +1003,7 @@ public class OpenShift extends DefaultOpenShiftClient {
     /**
      * Most of the groups are `system:*` wide therefore use `kind: ClusterRole`
      *
-     * @param roleName role name
+     * @param roleName  role name
      * @param groupName group name
      * @return role binging
      * @deprecated use method {@link #addRoleToGroup(String, String, String)}

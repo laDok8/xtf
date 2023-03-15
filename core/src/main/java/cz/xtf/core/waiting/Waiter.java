@@ -31,7 +31,7 @@ public interface Waiter {
      * {@link LogPoint#NONE}
      *
      * @param timeUnit timeUnit that is converts time {@code t} to milliseconds
-     * @param t timeout in {@code timeUnit}
+     * @param t        timeout in {@code timeUnit}
      * @return this
      */
     Waiter timeout(TimeUnit timeUnit, long t);
@@ -48,7 +48,7 @@ public interface Waiter {
      * Sets waiter conditions check interval.
      *
      * @param timeUnit timeUnit that is converts time {@code t} to milliseconds
-     * @param t interval in milliseconds
+     * @param t        interval in milliseconds
      * @return this
      */
     Waiter interval(TimeUnit timeUnit, long t);
@@ -166,7 +166,7 @@ public interface Waiter {
          *
          * @param reason reason of waiting
          * @param millis waiting timeout on condition
-         * @param level logging severity of <code>{@param reason}</code> log
+         * @param level  logging severity of <code>{@param reason}</code> log
          */
         public void logStart(String reason, long millis, Level level) {
             if (this.equals(START) || this.equals(BOTH))
@@ -190,7 +190,7 @@ public interface Waiter {
          *
          * @param reason reason of waiting
          * @param millis waiting timeout on condition
-         * @param level logging severity of {@param reason} log
+         * @param level  logging severity of {@param reason} log
          */
         public void logEnd(String reason, long millis, Level level) {
             if (this.equals(END) || this.equals(BOTH))

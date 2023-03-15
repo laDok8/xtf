@@ -95,8 +95,8 @@ public class PodLogs implements ServiceLogs {
          * Gets a {@link PrintStream} instance that will be passed on and used by the {@link PodLogs} instance
          * 
          * @param printStream A {@link PrintStream} instance which will be used for streaming the service logs.
-         *        It is expected that the {@link PrintStream} instance life cycle will be handled
-         *        at the outer scope level, in the context and by the component which created it.
+         *                    It is expected that the {@link PrintStream} instance life cycle will be handled
+         *                    at the outer scope level, in the context and by the component which created it.
          * @return A {@link Builder} instance with the {@code outputTo} property set to the given value.
          */
         public Builder outputTo(final PrintStream printStream) {

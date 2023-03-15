@@ -235,9 +235,9 @@ public class ServiceLogsStreamingRunner implements BeforeAllCallback, AfterAllCa
     /**
      * Creates a concrete {@link ServiceLogs} instance to manage service logs streaming for the current environment
      *
-     * @param extensionContext The current test execution context
+     * @param extensionContext             The current test execution context
      * @param testClazzServiceLogsSettings The settings to be used in order to create a concrete {@link ServiceLogs}
-     *        instance for a given test class
+     *                                     instance for a given test class
      * @return A concrete {@link ServiceLogs} instance for a given test class
      */
     private ServiceLogs createServiceLogs(ExtensionContext extensionContext,
