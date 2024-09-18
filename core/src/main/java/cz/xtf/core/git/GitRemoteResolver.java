@@ -1,20 +1,16 @@
 package cz.xtf.core.git;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.eclipse.jgit.transport.RemoteConfig;
 
 import lombok.extern.slf4j.Slf4j;
@@ -44,68 +40,62 @@ class GitRemoteResolver {
 
     /**
      * Try to set repository ref and URL from HEAD commit
-     * </p>
-     * 
-     * @param gitDir Path to .git directory
      */
-    private static void resolveRepoFromHEAD(Optional<File> gitDir) {
-        if (!gitDir.isPresent()) {
-            log.debug("Failed to find a git config");
+    private static void resolveRepoFromHEAD() throws IOException, URISyntaxException {
+        //look for a git repository recursively till system root folder
+        Repository repository = new FileRepositoryBuilder().findGitDir().build();
+
+        if (repository == null) {
+            log.debug("Failed to find a git repository");
             return;
         }
 
-        try (Git git = Git.open(gitDir.get())) {
-            Repository repository = git.getRepository();
+        //get current commit hash
+        ObjectId commitId = repository.resolve("HEAD");
 
-            //get current commit hash
-            ObjectId commitId = repository.resolve("HEAD");
+        //get all remote references
+        List<Ref> refs = repository.getRefDatabase().getRefs().stream()
+                .filter(reference -> reference.getName().startsWith("refs/remotes/"))
+                .collect(Collectors.toList());
 
-            //get all remote references
-            List<Ref> refs = repository.getRefDatabase().getRefs().stream()
-                    .filter(reference -> reference.getName().startsWith("refs/remotes/"))
-                    .collect(Collectors.toList());
-
-            List<String> matches = new ArrayList<>();
-            // Walk through all the refs to see if any point to this commit
-            for (Ref ref : refs) {
-                if (ref.getObjectId().equals(commitId)) {
-                    matches.add(ref.getName());
-                }
+        List<String> matches = new ArrayList<>();
+        // Walk through all the refs to see if any point to this commit
+        for (Ref ref : refs) {
+            if (ref.getObjectId().equals(commitId)) {
+                matches.add(ref.getName());
             }
-
-            if (matches.isEmpty()) {
-                log.debug("No remote references found for the current commit");
-                return;
-            }
-
-            //In case there are multiple matches, we prefer upstream or origin (in this order)
-            List<String> preferredMatches = matches.stream()
-                    .filter(reference -> reference.contains("upstream") || reference.contains("origin"))
-                    .sorted(Comparator.reverseOrder()) // 1) upstream 2) origin
-                    .collect(Collectors.toList());
-
-            if (matches.size() > 1 && !preferredMatches.isEmpty()) {
-                matches = preferredMatches;
-            }
-
-            //branch is string behind the last /
-            reference = matches.stream()
-                    .findFirst()
-                    .map(ref -> ref.substring(ref.lastIndexOf('/') + 1))
-                    .orElse(null);
-
-            log.info("xtf.git.repository.ref got automatically resolved as {}", reference);
-
-            String remote = repository.getRemoteName(matches.get(0));
-            url = getRemoteUrl(repository, remote);
-
-            if (url != null) {
-                log.info("xtf.git.repository.url got automatically resolved as {}", url);
-            }
-
-        } catch (IOException | URISyntaxException e) {
-            log.debug("Failed to dynamically set the tested repository url and reference", e);
         }
+
+        if (matches.isEmpty()) {
+            log.debug("No remote references found for the current commit");
+            return;
+        }
+
+        //In case there are multiple matches, we prefer upstream or origin (in this order)
+        List<String> preferredMatches = matches.stream()
+                .filter(reference -> reference.contains("upstream") || reference.contains("origin"))
+                .sorted(Comparator.reverseOrder()) // 1) upstream 2) origin
+                .collect(Collectors.toList());
+
+        if (matches.size() > 1 && !preferredMatches.isEmpty()) {
+            matches = preferredMatches;
+        }
+
+        //branch is string behind the last /
+        reference = matches.stream()
+                .findFirst()
+                .map(ref -> ref.substring(ref.lastIndexOf('/') + 1))
+                .orElse(null);
+
+        log.info("xtf.git.repository.ref got automatically resolved as {}", reference);
+
+        String remote = repository.getRemoteName(matches.get(0));
+        url = getRemoteUrl(repository, remote);
+
+        if (url != null) {
+            log.info("xtf.git.repository.url got automatically resolved as {}", url);
+        }
+
     }
 
     /**
@@ -133,27 +123,11 @@ class GitRemoteResolver {
     }
 
     static {
-        Optional<File> gitDir = findGit();
-        resolveRepoFromHEAD(gitDir);
-    }
-
-    /**
-     * look for a git repository recursively till system root folder
-     * 
-     * @return .git directory
-     */
-    private static Optional<File> findGit() {
-        Path current = Paths.get(".").normalize().toAbsolutePath().normalize();
-        // what is here? (previously limited to 3 hops)
-        while (current != current.getParent()) {
-            // look into a parent directory
-            File[] gitConfig = current.toFile().listFiles((dir, name) -> name.equals(".git"));
-            if (gitConfig != null && gitConfig.length == 1) {
-                return Optional.of(gitConfig[0]);
-            }
-            current = current.getParent();
+        try {
+            resolveRepoFromHEAD();
+        } catch (IOException | URISyntaxException e) {
+            log.error("Failed to resolve repository from HEAD", e);
         }
-        return Optional.empty();
     }
 
     protected static String repositoryReference() {
