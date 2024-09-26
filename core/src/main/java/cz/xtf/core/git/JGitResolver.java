@@ -26,16 +26,21 @@ import lombok.extern.slf4j.Slf4j;
  * </p>
  */
 @Slf4j
-class GitRemoteResolver {
+class JGitResolver implements GitResolver {
     private static final String URL_TEMPLATE = "https://%s/%s/%s";
     private static String reference;
     private static String url;
 
     /**
-     * We require HTTPS format, for unauthorized access to the repository, let's convert it
+     * Try to set repository ref and URL from HEAD commit
      */
-    private static String getRepositoryUrl(String host, String remote, String repository) {
-        return String.format(URL_TEMPLATE, host, remote, repository);
+    public JGitResolver() {
+        try {
+            resolveRepoFromHEAD();
+        } catch (IOException | URISyntaxException e) {
+            log.error("Failed to resolve repository from HEAD", e);
+            throw new RuntimeException("Failed to resolve repository from HEAD with error" + e.getMessage());
+        }
     }
 
     /**
@@ -55,8 +60,7 @@ class GitRemoteResolver {
 
         //get all remote references
         List<Ref> refs = repository.getRefDatabase().getRefs().stream()
-                .filter(reference -> reference.getName().startsWith("refs/remotes/"))
-                .collect(Collectors.toList());
+                .filter(reference -> reference.getName().startsWith("refs/remotes/")).collect(Collectors.toList());
 
         List<String> matches = new ArrayList<>();
         // Walk through all the refs to see if any point to this commit
@@ -82,10 +86,7 @@ class GitRemoteResolver {
         }
 
         //branch is string behind the last /
-        reference = matches.stream()
-                .findFirst()
-                .map(ref -> ref.substring(ref.lastIndexOf('/') + 1))
-                .orElse(null);
+        reference = matches.stream().findFirst().map(ref -> ref.substring(ref.lastIndexOf('/') + 1)).orElse(null);
 
         log.info("xtf.git.repository.ref got automatically resolved as {}", reference);
 
@@ -100,7 +101,7 @@ class GitRemoteResolver {
 
     /**
      * given a remote reference, get it's remote URL
-     * 
+     *
      * @param repository git repository
      * @param remoteReference reference in format "refs/remotes/remote/branch"
      * @return URL in HTTPS format
@@ -114,27 +115,26 @@ class GitRemoteResolver {
         // we expect a single URI
         String[] pathTokens = remoteConfig.getURIs().get(0).getPath().split("/");
         if (pathTokens.length != 2) {
-            log.info("Unexpected path '{}' in URI '{}' of git remote ref '{}'",
-                    remoteConfig.getURIs().get(0).getPath(), remoteConfig.getURIs().get(0), remoteReference);
+            log.info("Unexpected path '{}' in URI '{}' of git remote ref '{}'", remoteConfig.getURIs().get(0).getPath(),
+                    remoteConfig.getURIs().get(0), remoteReference);
             return null;
         }
         // the URI must be in HTTPS format
         return getRepositoryUrl(remoteConfig.getURIs().get(0).getHost(), pathTokens[0], pathTokens[1]);
     }
 
-    static {
-        try {
-            resolveRepoFromHEAD();
-        } catch (IOException | URISyntaxException e) {
-            log.error("Failed to resolve repository from HEAD", e);
-        }
+    /**
+     * We require HTTPS format, for unauthorized access to the repository, let's convert it
+     */
+    private static String getRepositoryUrl(String host, String remote, String repository) {
+        return String.format(URL_TEMPLATE, host, remote, repository);
     }
 
-    protected static String repositoryReference() {
-        return reference;
-    }
-
-    protected static String repositoryUrl() {
+    public String resolveRepoUrl() {
         return url;
+    }
+
+    public String resolveRepoRef() {
+        return reference;
     }
 }
